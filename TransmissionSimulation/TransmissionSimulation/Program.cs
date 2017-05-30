@@ -10,6 +10,7 @@ namespace TransmissionSimulation
     {
         static void Main(string[] args)
         {
+            //Start the threads
         }
     }
 }
