@@ -8,5 +8,6 @@ namespace TransmissionSimulation.Helpers
 {
     class HammingHelper
     {
+
     }
 }
