@@ -4,8 +4,8 @@ namespace TransmissionSimulation
 {
     public class ProgramOption
     {
-        [Option('s', "size", DefaultValue = 10, HelpText = "Frame size.")]
-        public int FrameSize { get; set; }
+        [Option('s', "size", DefaultValue = 10, HelpText = "Buffer size.")]
+        public int BufferSize { get; set; }
 
         [Option('t', "timeout", DefaultValue = 5, HelpText = "Timeout in seconds of the connexion.")]
         public int Timeout { get; set; }
