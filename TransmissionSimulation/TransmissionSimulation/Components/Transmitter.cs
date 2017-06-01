@@ -1,11 +1,11 @@
-﻿﻿﻿﻿﻿using System;
+﻿﻿﻿﻿﻿﻿using System;
 using System.Collections;
 using System.Threading;
 using TransmissionSimulation.Ressources;
 
 namespace TransmissionSimulation.Components
 {
-    class Transmitter
+    class Transmitter : ITransmitter
     {
         private static Mutex mutex = new Mutex();
         private BitArray sendingSource;
