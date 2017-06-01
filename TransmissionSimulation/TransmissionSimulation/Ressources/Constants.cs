@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,5 +14,10 @@ namespace TransmissionSimulation.Ressources
         /// Frame size in bytes
         /// </summary>
         public const int FrameSize = 128;
+
+        /// <summary>
+        /// The default delay of transfer in seconds
+        /// </summary>
+        public const int DefaultDelay = 5;
     }
 }
