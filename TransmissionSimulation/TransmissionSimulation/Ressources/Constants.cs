@@ -9,5 +9,10 @@ namespace TransmissionSimulation.Ressources
     public static class Constants
     {
         public enum Station { Source, Dest }
+
+        /// <summary>
+        /// Frame size in bytes
+        /// </summary>
+        public const int FrameSize = 128;
     }
 }
