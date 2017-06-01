@@ -24,6 +24,7 @@ namespace TransmissionSimulation.Models
         /// </summary>
         /// <param name="id"></param>
         /// <param name="data"></param>
+        /// <param name="isAck"></param>
         public Frame(ulong id, BitArray data, bool isAck) : this(id, data, isAck, !isAck)
         {
         }
@@ -42,6 +43,14 @@ namespace TransmissionSimulation.Models
             this.isAck = isAck;
             this.isNak = isNak;
         }
+
+        public ulong Id => id;
+
+        public BitArray Data => data;
+
+        public bool IsAck => isAck;
+
+        public bool IsNak => isNak;
 
         private static ulong LastId()
         {
