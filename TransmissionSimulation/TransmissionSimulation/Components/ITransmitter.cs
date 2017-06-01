@@ -1,5 +1,4 @@
-﻿using System;
-using TransmissionSimulation.Ressources;
+﻿using TransmissionSimulation.Ressources;
                             
 namespace TransmissionSimulation.Components
 {
@@ -8,6 +7,6 @@ namespace TransmissionSimulation.Components
         bool TransmitterReady(Constants.Station station);
         void SendData(byte[] data, Constants.Station station);
         bool DataReceived(Constants.Station station);
-        byte[] GetData(Constants.Station station);
+        System.Collections.BitArray GetData(Constants.Station station);
     }
 }

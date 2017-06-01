@@ -1,0 +1,2 @@
+-- Questions --
+Le code de Hamming doit-il être utilisé pour la détection, la correction ou les deux?
