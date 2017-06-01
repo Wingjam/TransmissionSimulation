@@ -6,11 +6,6 @@ namespace TransmissionSimulation.Models
     {
         private static ulong lastId = 0;
 
-        private ulong id;
-        private BitArray data;
-        private bool isAck;
-        private bool isNak;
-
         /// <summary>
         /// Constructor with the id auto generated. Used for transmitting information
         /// </summary>
@@ -38,19 +33,20 @@ namespace TransmissionSimulation.Models
         /// <param name="isNak"></param>
         private Frame(ulong id, BitArray data, bool isAck, bool isNak)
         {
-            this.id = id;
-            this.data = data;
-            this.isAck = isAck;
-            this.isNak = isNak;
+            Id = id;
+            Data = data;
+            IsAck = isAck;
+            IsNak = isNak;
         }
 
-        public ulong Id => id;
+        public ulong Id { get; }
 
-        public BitArray Data => data;
+        public BitArray Data { get; }
 
-        public bool IsAck => isAck;
+        public bool IsAck { get; }
 
-        public bool IsNak => isNak;
+        public bool IsNak { get; }
+
 
         private static ulong LastId()
         {
