@@ -1,4 +1,5 @@
 ﻿﻿﻿﻿﻿using System;
+using System.Collections;
 using System.Threading;
 using TransmissionSimulation.Ressources;
 
@@ -7,10 +8,10 @@ namespace TransmissionSimulation.Components
     class Transmitter
     {
         private static Mutex mutex = new Mutex();
-        private byte[] sendingSource;
-		private byte[] sendingDest;
-        private byte[] receivingDest;
-        private byte[] receivingSource;
+        private BitArray sendingSource;
+		private BitArray sendingDest;
+        private BitArray receivingDest;
+        private BitArray receivingSource;
         private bool readyToSendSource;
         private bool dataReceivedDest;
         private bool readyToSendDest;
@@ -18,10 +19,10 @@ namespace TransmissionSimulation.Components
 
         public Transmitter()
         {
-            sendingSource = new byte[Constants.FrameSize];
-            sendingDest = new byte[Constants.FrameSize];
-			receivingSource = new byte[Constants.FrameSize];
-			receivingDest = new byte[Constants.FrameSize];
+            sendingSource = new BitArray(Constants.FrameSize*8);
+            sendingDest = new BitArray(Constants.FrameSize*8);
+			receivingSource = new BitArray(Constants.FrameSize * 8);
+			receivingDest = new BitArray(Constants.FrameSize * 8);
         }
 
         public void InjectError()
@@ -36,10 +37,10 @@ namespace TransmissionSimulation.Components
 
 		public bool DataReceived(Constants.Station station)
 		{
-			return (station == Constants.Station.Source) ? dataReceivedDest : dataReceivedSource;
+			return (station == Constants.Station.Source) ? dataReceivedSource : dataReceivedDest;
 		}
 
-        public void SendData(byte[] data, Constants.Station station)
+        public void SendData(BitArray data, Constants.Station station)
         {
             if (station == Constants.Station.Source)
             {
@@ -48,13 +49,22 @@ namespace TransmissionSimulation.Components
             }
         }
 
-        public byte[] GetData(Constants.Station station)
+        public BitArray GetData(Constants.Station station)
         {
-            byte[] data = new byte[Constants.FrameSize];
+            BitArray data = new BitArray(Constants.FrameSize * 8);
 
             if (DataReceived(station))
             {
-                data = (station == Constants.Station.Source) ? receivingSource : receivingDest;
+                if (station == Constants.Station.Source)
+                {
+                    data = receivingSource;
+                    dataReceivedSource = false;
+                }
+                else
+                {
+                    data = receivingDest;
+                    dataReceivedDest = false;
+                }
             }
             else
             {
