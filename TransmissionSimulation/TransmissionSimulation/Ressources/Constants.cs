@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TransmissionSimulation.Ressources
 {
-    static class Constants
+    public static class Constants
     {
         public enum Station { Source, Dest }
     }
