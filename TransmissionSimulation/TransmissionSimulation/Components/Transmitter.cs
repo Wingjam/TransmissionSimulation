@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿using System;
+﻿﻿﻿﻿﻿﻿﻿﻿using System;
 using System.Collections;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,10 +39,11 @@ namespace TransmissionSimulation.Components
 
         private void TransferData()
         {
-            //apply error if needed
-            //actually transfer data
-            //reset error
-        }
+			//http://www.c-sharpcorner.com/UploadFile/1d42da/threading-with-mutex/
+			//apply error if needed
+			//actually transfer data
+			//reset error
+		}
 
         public void InjectError(int bitInversions)
         {
