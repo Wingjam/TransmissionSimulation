@@ -1,6 +1,7 @@
-﻿﻿﻿﻿﻿﻿using System;
+﻿﻿﻿﻿﻿﻿﻿using System;
 using System.Collections;
 using System.Threading;
+using System.Threading.Tasks;
 using TransmissionSimulation.Ressources;
 
 namespace TransmissionSimulation.Components
@@ -16,6 +17,7 @@ namespace TransmissionSimulation.Components
         private bool dataReceivedDest;
         private bool readyToSendDest;
         private bool dataReceivedSource;
+        private BitArray injectedError;
 
         public Transmitter()
         {
@@ -23,11 +25,28 @@ namespace TransmissionSimulation.Components
             sendingDest = new BitArray(Constants.FrameSize*8);
 			receivingSource = new BitArray(Constants.FrameSize * 8);
 			receivingDest = new BitArray(Constants.FrameSize * 8);
+
+            Task.Factory.StartNew(() => CheckForTransferConditions(), TaskCreationOptions.LongRunning);
         }
 
-        public void InjectError()
+        private void CheckForTransferConditions()
         {
-            
+            while(true)
+            {
+                //Check for boolean conditions
+            }
+        }
+
+        private void TransferData()
+        {
+            //apply error if needed
+            //actually transfer data
+            //reset error
+        }
+
+        public void InjectError(int bitInversions)
+        {
+            //make bit array based on random
         }
 
         public bool TransmitterReady(Constants.Station station)
