@@ -8,5 +8,6 @@ namespace TransmissionSimulation.Ressources
 {
     static class Constants
     {
+        enum Station { Source, Dest }
     }
 }
