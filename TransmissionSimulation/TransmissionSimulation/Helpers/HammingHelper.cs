@@ -72,6 +72,7 @@ namespace TransmissionSimulation.Helpers
                 }
             }
 
+            // Correct the error, if there is one ...
             if (errorSyndrome != 0)
             {
                 bitArrayInput[errorSyndrome - 1] = !bitArrayInput[errorSyndrome - 1];
@@ -103,7 +104,6 @@ namespace TransmissionSimulation.Helpers
 
         public static bool IsPowerOf2(int i)
         {
-            //https://graphics.stanford.edu/~seander/bithacks.html#DetermineIfPowerOf2
             return (i & (i - 1)) == 0;
         }
 
@@ -125,7 +125,7 @@ namespace TransmissionSimulation.Helpers
             // For each number where j is in decomposition of power of 2 (Tanenbaum book p. 222)
             // e.g. 11 = 8 + 2 + 1
             // e.g. 29 = 16 + 8 + 4 + 1
-            for (int j = i + 1; j < bitArray.Length; j++)
+            for (int j = i; j < bitArray.Length; j++)
             {
                 if (IsBitSet(j + 1, i + 1))
                 {

@@ -72,7 +72,7 @@ namespace TransmissionSimulationTests.Helpers
             // #1 case with 1 error
             bitArray = new BitArray(11)
             {
-                [2] = true, // TODO this is the error (comment this)
+                //[2] = true, // this is the error
                 [7] = true,
                 [10] = true,
             };
