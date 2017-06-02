@@ -20,7 +20,7 @@ namespace TransmissionSimulation.Components
         private uint bitInversions;
         private ArrayList indicesInversions;
 
-        public ArrayList IndicesInversions { set => indicesInversions = value; }
+        public ArrayList IndicesInversions { get => indicesInversions; set => indicesInversions = value; }
         public uint BitInversions { set => bitInversions = value; }
         public bool ReadyToSendSource
         {
@@ -73,6 +73,7 @@ namespace TransmissionSimulation.Components
             readyToSendDest = true;
             dataReceivedSource = false;
             bitInversions = 0;
+            indicesInversions = new ArrayList();
         }
 
         /// <summary>
@@ -120,11 +121,12 @@ namespace TransmissionSimulation.Components
             {
                 foreach(var i in indicesInversions)
                 {
-                    transferData[(int)i] = !transferData[(int)i];
+                    if ((int)i < indicesInversions.Count)
+                        transferData[(int)i] = !transferData[(int)i];
                 }
             }
 
-			indicesInversions = null;
+			indicesInversions.Clear();
 
 			return transferData;
 		}
