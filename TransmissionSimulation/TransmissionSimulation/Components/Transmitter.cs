@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections;
 using System.Threading;
 using System.Threading.Tasks;
@@ -68,6 +68,11 @@ namespace TransmissionSimulation.Components
             sendingDest = null;
             receivingSource = null;
             receivingDest = null;
+            readyToSendSource = true;
+            dataReceivedDest = false;
+            readyToSendDest = true;
+            dataReceivedSource = false;
+            bitInversions = 0;
         }
 
         /// <summary>
