@@ -1,4 +1,4 @@
-﻿﻿﻿using System;
+﻿using System;
 using System.Collections;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,8 +18,46 @@ namespace TransmissionSimulation.Components
         private bool readyToSendDest;
         private bool dataReceivedSource;
         private uint bitInversions;
+        private ArrayList indicesInversions;
 
+        public ArrayList IndicesInversions { set => indicesInversions = value; }
         public uint BitInversions { set => bitInversions = value; }
+        public bool ReadyToSendSource
+        {
+            get => readyToSendSource;
+            set
+            {
+                readyToSendSource = value;
+                CheckForTransferConditions();
+            }
+        }
+        public bool DataReceivedDest
+        {
+            get => dataReceivedDest;
+            set
+            {
+                dataReceivedDest = value;
+                CheckForTransferConditions();
+            }
+        }
+        public bool ReadyToSendDest
+        {
+            get => readyToSendDest;
+            set
+            {
+                readyToSendDest = value;
+                CheckForTransferConditions();
+            }
+        }
+        public bool DataReceivedSource
+        {
+            get => dataReceivedSource;
+            set
+            {
+                dataReceivedSource = value;
+                CheckForTransferConditions();
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:TransmissionSimulation.Components.Transmitter"/> class.
@@ -30,8 +68,6 @@ namespace TransmissionSimulation.Components
             sendingDest = null;
             receivingSource = null;
             receivingDest = null;
-
-            Task.Factory.StartNew(() => CheckForTransferConditions(), TaskCreationOptions.LongRunning);
         }
 
         /// <summary>
@@ -40,46 +76,60 @@ namespace TransmissionSimulation.Components
         /// </summary>
         private void CheckForTransferConditions()
         {
-            while (true)
+            mutex.WaitOne();
+
+            //Source to Destination
+            if (!readyToSendSource && !dataReceivedDest)
             {
-                //Check for boolean conditions
-                if (!readyToSendSource && !dataReceivedDest)
+                BitArray transferData = sendingSource;
+                sendingSource = null;
+                Thread.Sleep(Constants.DefaultDelay * 100); //deciseconds to milliseconds
+                transferData = InjectErrors(transferData);
+                receivingDest = transferData;
+                readyToSendSource = true;
+                dataReceivedDest = true;
+            }
+            //Destination to Source
+            else if (!readyToSendDest && !dataReceivedSource)
+            {
+                BitArray transferData = sendingDest;
+                sendingDest = null;
+                Thread.Sleep(Constants.DefaultDelay * 100);
+                transferData = InjectErrors(transferData);
+                receivingSource = transferData;
+                readyToSendDest = true;
+                dataReceivedSource = true;
+            }
+
+            mutex.ReleaseMutex();
+        }
+
+		/// <summary>
+		/// Injects errors into the data to transfer based on the desired positions from IndicesInversions.
+		/// </summary>
+		/// <returns>Modified, partially erronous data.</returns>
+		/// <param name="transferData">Data to insert errors into.</param>
+		private BitArray InjectErrors(BitArray transferData)
+		{
+            if (indicesInversions != null)
+            {
+                foreach(var i in indicesInversions)
                 {
-					mutex.WaitOne();
-
-                    BitArray transferData = sendingSource;
-                    sendingSource = null;
-                    Thread.Sleep(Constants.DefaultDelay * 100); //deciseconds to milliseconds
-                    transferData = InjectError(transferData);
-                    receivingDest = transferData;
-                    readyToSendSource = true;
-                    dataReceivedDest = true;
-
-                    mutex.ReleaseMutex();
-                }
-                else if (!readyToSendDest && !dataReceivedSource)
-                {
-					mutex.WaitOne();
-
-                    BitArray transferData = sendingDest;
-                    sendingDest = null;
-                    Thread.Sleep(Constants.DefaultDelay*100);
-                    transferData = InjectError(transferData);
-                    receivingSource = transferData;
-                    readyToSendDest = true;
-					dataReceivedSource = true;
-
-					mutex.ReleaseMutex();
+                    transferData[(int)i] = !transferData[(int)i];
                 }
             }
-        }
+
+			indicesInversions = null;
+
+			return transferData;
+		}
 
         /// <summary>
         /// Injects errors randomly into the data to transfer based on the BitInversions property.
         /// </summary>
         /// <returns>Modified, partially erronous data.</returns>
         /// <param name="transferData">Data to insert errors into.</param>
-        private BitArray InjectError(BitArray transferData)
+        private BitArray InjectErrorsRandomly(BitArray transferData)
         {
             for (int i = 0; i < bitInversions; ++i)
             {
