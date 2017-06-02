@@ -52,8 +52,59 @@ namespace TransmissionSimulationTests.Helpers
         [TestMethod]
         public void TestDecrypt()
         {
-            //TODO
-            Assert.AreEqual(1,1);
+            // #1 case
+            BitArray bitArray = new BitArray(11)
+            {
+                [2] = true,
+                [7] = true,
+                [10] = true,
+            };
+
+            BitArray bitArrayExpected = new BitArray(7)
+            {
+                [0] = true,
+                [6] = true,
+            };
+
+            BitArray bitArrayoutput = HammingHelper.Decrypt(bitArray);
+            Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArrayExpected), HammingHelper.BitArrayToDigitString(bitArrayoutput));
+
+            // #1 case with 1 error
+            bitArray = new BitArray(11)
+            {
+                [2] = true, // TODO this is the error (comment this)
+                [7] = true,
+                [10] = true,
+            };
+
+            bitArrayExpected = new BitArray(7)
+            {
+                [0] = true,
+                [6] = true,
+            };
+
+            bitArrayoutput = HammingHelper.Decrypt(bitArray);
+            Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArrayExpected), HammingHelper.BitArrayToDigitString(bitArrayoutput));
+
+            // #2 case
+            bitArray = new BitArray(7)
+            {
+                [1] = true,
+                [2] = true,
+                [5] = true,
+                [6] = true
+            };
+
+            bitArrayExpected = new BitArray(4)
+            {
+                [0] = true,
+                [2] = true,
+                [3] = true
+            };
+
+            bitArrayoutput = HammingHelper.Decrypt(bitArray);
+            Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArrayExpected), HammingHelper.BitArrayToDigitString(bitArrayoutput));
+
         }
 
         [TestMethod]
