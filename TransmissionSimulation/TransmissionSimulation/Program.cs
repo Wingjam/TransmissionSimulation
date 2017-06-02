@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Windows.Forms;
 
 namespace TransmissionSimulation
 {
@@ -12,14 +13,14 @@ namespace TransmissionSimulation
 
             if (isValid)
             {
-                //Start the threads
-                //TODO ajouter dequoi pour envoyer des erreurs a raph
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(new MainForm(progOption));
             }
             else
             {
                 Console.WriteLine("Invalid input. Please refer to the help. (TransmissionSimulation.exe -help");
             }
-            Console.ReadLine();
         }
 
         static void Afficher(BitArray dataToPrint)

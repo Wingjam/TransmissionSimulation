@@ -19,5 +19,10 @@ namespace TransmissionSimulation.Ressources
         /// The default delay of transfer in deciseconds (1/10 second)
         /// </summary>
         public const int DefaultDelay = 5;
+
+        /// <summary>
+        /// The maximum of error that can be inject into a frame.
+        /// </summary>
+        public const int MaximumOfErrorToInject = 2;
     }
 }
