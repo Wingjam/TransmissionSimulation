@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections;
 using System.Threading;
 using System.Threading.Tasks;
@@ -42,11 +42,11 @@ namespace TransmissionSimulation.Components
         {
             while (true)
             {
-                mutex.WaitOne();
-
                 //Check for boolean conditions
                 if (!readyToSendSource && !dataReceivedDest)
                 {
+					mutex.WaitOne();
+
                     BitArray transferData = sendingSource;
                     sendingSource = null;
                     Thread.Sleep(Constants.DefaultDelay * 10); //deciseconds to milliseconds
@@ -54,19 +54,23 @@ namespace TransmissionSimulation.Components
                     receivingDest = transferData;
                     readyToSendSource = true;
                     dataReceivedDest = true;
+
+                    mutex.ReleaseMutex();
                 }
                 else if (!readyToSendDest && !dataReceivedSource)
                 {
+					mutex.WaitOne();
+
                     BitArray transferData = sendingDest;
                     sendingDest = null;
                     Thread.Sleep(Constants.DefaultDelay*10);
                     transferData = InjectError(transferData);
                     receivingSource = transferData;
                     readyToSendDest = true;
-                    dataReceivedSource = true;
-                }
+					dataReceivedSource = true;
 
-                mutex.ReleaseMutex();
+					mutex.ReleaseMutex();
+                }
             }
         }
 
