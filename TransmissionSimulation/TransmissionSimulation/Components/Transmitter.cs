@@ -49,7 +49,7 @@ namespace TransmissionSimulation.Components
 
                     BitArray transferData = sendingSource;
                     sendingSource = null;
-                    Thread.Sleep(Constants.DefaultDelay * 10); //deciseconds to milliseconds
+                    Thread.Sleep(Constants.DefaultDelay * 100); //deciseconds to milliseconds
                     transferData = InjectError(transferData);
                     receivingDest = transferData;
                     readyToSendSource = true;
@@ -63,7 +63,7 @@ namespace TransmissionSimulation.Components
 
                     BitArray transferData = sendingDest;
                     sendingDest = null;
-                    Thread.Sleep(Constants.DefaultDelay*10);
+                    Thread.Sleep(Constants.DefaultDelay*100);
                     transferData = InjectError(transferData);
                     receivingSource = transferData;
                     readyToSendDest = true;
