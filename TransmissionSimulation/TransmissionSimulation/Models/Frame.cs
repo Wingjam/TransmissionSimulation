@@ -1,10 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 
 namespace TransmissionSimulation.Models
 {
     class Frame
     {
-        private static ulong lastId = 0;
+        private static UInt16 lastId = 0;
 
         /// <summary>
         /// Constructor with the id auto generated. Used for transmitting information
@@ -20,7 +21,7 @@ namespace TransmissionSimulation.Models
         /// <param name="id"></param>
         /// <param name="data"></param>
         /// <param name="isAck"></param>
-        public Frame(ulong id, BitArray data, bool isAck) : this(id, data, isAck, !isAck)
+        public Frame(UInt16 id, BitArray data, bool isAck) : this(id, data, isAck, !isAck)
         {
         }
 
@@ -31,7 +32,7 @@ namespace TransmissionSimulation.Models
         /// <param name="data"></param>
         /// <param name="isAck"></param>
         /// <param name="isNak"></param>
-        private Frame(ulong id, BitArray data, bool isAck, bool isNak)
+        private Frame(UInt16 id, BitArray data, bool isAck, bool isNak)
         {
             Id = id;
             Data = data;
@@ -39,7 +40,13 @@ namespace TransmissionSimulation.Models
             IsNak = isNak;
         }
 
-        public ulong Id { get; }
+        public int HeaderSize()
+        {
+            //id + isAck + isNak
+            return sizeof(UInt16) + sizeof(bool) + sizeof(bool);
+        }
+
+        public UInt16 Id { get; }
 
         public BitArray Data { get; }
 
@@ -48,8 +55,9 @@ namespace TransmissionSimulation.Models
         public bool IsNak { get; }
 
 
-        private static ulong LastId()
+        private static UInt16 LastId()
         {
+            //TODO remettre a 0 quand on atteint le buffersize*2
             return lastId++;
         }
     }
