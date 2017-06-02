@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransmissionSimulation", "TransmissionSimulation\TransmissionSimulation.csproj", "{DE022F89-B026-4E66-8483-4259271E0DB5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransmissionSimulationTests", "TransmissionSimulationTests\TransmissionSimulationTests.csproj", "{DA19C2A6-06C1-429A-A404-964F81E1C2CA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{DE022F89-B026-4E66-8483-4259271E0DB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE022F89-B026-4E66-8483-4259271E0DB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE022F89-B026-4E66-8483-4259271E0DB5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA19C2A6-06C1-429A-A404-964F81E1C2CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA19C2A6-06C1-429A-A404-964F81E1C2CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA19C2A6-06C1-429A-A404-964F81E1C2CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA19C2A6-06C1-429A-A404-964F81E1C2CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
