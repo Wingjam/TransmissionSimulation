@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿﻿﻿using System;
 using System.Collections;
 using System.Threading;
 using System.Threading.Tasks;
@@ -138,7 +138,7 @@ namespace TransmissionSimulation.Components
         /// <param name="station">Station that gets available data.</param>
         public BitArray GetData(Constants.Station station)
         {
-            BitArray data = new BitArray(Constants.FrameSize * 8);
+            BitArray data = null;
 
             if (DataReceived(station))
             {
