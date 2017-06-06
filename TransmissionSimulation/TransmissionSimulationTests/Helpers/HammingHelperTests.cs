@@ -8,106 +8,6 @@ namespace TransmissionSimulationTests.Helpers
     [TestClass]
     public class HammingHelperTests
     {
-        [TestMethod]
-        public void TestEncrypt()
-        {
-
-            // #1 case 1000001 -> [1]00100001001
-            BitArray bitArray = new BitArray(7)
-            {
-                [0] = true,
-                [6] = true
-            };
-
-            BitArray bitArrayExpected = new BitArray(12)
-            {
-                [0] = true,
-                [3] = true,
-                [8] = true,
-                [11] = true
-            };
-
-            BitArray bitArrayoutput = HammingHelper.Encrypt(bitArray);
-            Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArrayExpected), HammingHelper.BitArrayToDigitString(bitArrayoutput));
-
-            
-            // #2 case 1011 -> [0]0110011
-            bitArray = new BitArray(4)
-            {
-                [0] = true,
-                [2] = true,
-                [3] = true
-            };
-            bitArrayExpected = new BitArray(8)
-            {
-                [2] = true,
-                [3] = true,
-                [6] = true,
-                [7] = true
-            };
-
-            bitArrayoutput = HammingHelper.Encrypt(bitArray);
-            Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArrayExpected), HammingHelper.BitArrayToDigitString(bitArrayoutput));
-        }
-
-        [TestMethod]
-        public void TestDecrypt()
-        {
-            // #1 case [1]00100001001 -> 1000001
-            BitArray bitArray = new BitArray(12)
-            {
-                [0] = true,
-                [3] = true,
-                [8] = true,
-                [11] = true,
-            };
-
-            BitArray bitArrayExpected = new BitArray(7)
-            {
-                [0] = true,
-                [6] = true,
-            };
-
-            BitArray bitArrayoutput = HammingHelper.Decrypt(bitArray);
-            Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArrayExpected), HammingHelper.BitArrayToDigitString(bitArrayoutput));
-
-            //// #1 case with 1 error
-            //bitArray = new BitArray(11)
-            //{
-            //    //[2] = true, // this is the error
-            //    [7] = true,
-            //    [10] = true,
-            //};
-
-            //bitArrayExpected = new BitArray(7)
-            //{
-            //    [0] = true,
-            //    [6] = true,
-            //};
-
-            //bitArrayoutput = HammingHelper.Decrypt(bitArray);
-            //Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArrayExpected), HammingHelper.BitArrayToDigitString(bitArrayoutput));
-
-            //// #2 case [0]0110011 -> 1011
-            //bitArray = new BitArray(8)
-            //{
-            //    [2] = true,
-            //    [3] = true,
-            //    [6] = true,
-            //    [7] = true
-            //};
-
-            //bitArrayExpected = new BitArray(4)
-            //{
-            //    [0] = true,
-            //    [2] = true,
-            //    [3] = true
-            //};
-
-            //bitArrayoutput = HammingHelper.Decrypt(bitArray);
-            //Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArrayExpected), HammingHelper.BitArrayToDigitString(bitArrayoutput));
-
-        }
 
         [TestMethod]
         public void TestEncryptDecryptManager()
@@ -120,27 +20,26 @@ namespace TransmissionSimulationTests.Helpers
             };
 
             BitArray bitArrayEncrypt = HammingHelper.EncryptManager(bitArray);
-            BitArray bitArrayDecrypt = HammingHelper.Decrypt(bitArrayEncrypt);
+            BitArray bitArrayDecrypt = HammingHelper.DecryptManager(bitArrayEncrypt);
 
             Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArray), HammingHelper.BitArrayToDigitString(bitArrayDecrypt));
 
 
-            //// # Random case
-            //// TODO
-            //bitArray = new BitArray(50)
-            //{
-            //    [0] = true,
-            //    [6] = true,
-            //    [8] = true,
-            //    [18] = true,
-            //    [20] = true,
-            //    [29] = true,
-            //};
+            // # Random case
+            bitArray = new BitArray(32)
+            {
+                [0] = false,
+                [6] = true,
+                [8] = true,
+                [18] = true,
+                [20] = true,
+                [29] = true,
+            };
 
-            //bitArrayEncrypt = HammingHelper.Encrypt(bitArray);
-            //bitArrayDecrypt = HammingHelper.Decrypt(bitArrayEncrypt);
+            bitArrayEncrypt = HammingHelper.EncryptManager(bitArray);
+            bitArrayDecrypt = HammingHelper.DecryptManager(bitArrayEncrypt);
 
-            //Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArray), HammingHelper.BitArrayToDigitString(bitArrayDecrypt));
+            Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArray), HammingHelper.BitArrayToDigitString(bitArrayDecrypt));
 
         }
 
