@@ -24,6 +24,7 @@ namespace TransmissionSimulation.Components
         int BufferSize { get; set; }
         int TimeoutInMs { get; set; }
         FileStream fileStream;
+        Constants.ShowFrameDelegate sendFrameDelegate;
 
         /* Constants */
 
@@ -50,7 +51,6 @@ namespace TransmissionSimulation.Components
         /* Internal fields for treatment */
 
         /* Sender fields */
-        int ReadCursorInFile { get; set; }
         UInt16 NextAwaitedAckSequenceNumber { get; set; }
         UInt16 NextFrameToSendSequenceNumber { get; set; }
         bool FrameReadyToSend {
@@ -61,7 +61,7 @@ namespace TransmissionSimulation.Components
                 }
 
                 // Check if there is still frames to send or if the file is completly sent.
-                bool fileNotEntirelySent = ReadCursorInFile < fileStream.Length;
+                bool fileNotEntirelySent = fileStream.Position < fileStream.Length;
 
                 // We can send another frame if our output window isn't full. Valid only it we are sending a data frame. An Ack frame doesn't need this validation.
                 int outputWindowSize = NextFrameToSendSequenceNumber - NextAwaitedAckSequenceNumber;
@@ -75,7 +75,6 @@ namespace TransmissionSimulation.Components
 
 
         /* Receiver fields */
-        int WriteCursorInFile { get; set; }
         UInt16 NextAwaitedFrameSequenceNumber { get; set; }
         UInt16 LastFrameToSaveSequenceNumber
         {
@@ -110,6 +109,7 @@ namespace TransmissionSimulation.Components
             outputBuffer = new Dictionary<int, Frame>();
             this.TimeoutInMs = timeoutInMs;
             this.fileStream = fileStream;
+            this.sendFrameDelegate = sendFrame;
 
             // Initialize constants
             int frameSizeBeforeHamming = HammingHelper.GetDataSize(Constants.FrameSize * 8) / 8;
@@ -118,7 +118,7 @@ namespace TransmissionSimulation.Components
             MaxSequence = (UInt16)(bufferSize * 2 + 1);
 
             // Initialize fields
-            NextAwaitedAckSequenceNumber = 0;
+            NextAwaitedAckSequenceNumber = MaxSequence;
             NextFrameToSendSequenceNumber = 0;
             NextAwaitedFrameSequenceNumber = 0;
 
@@ -157,7 +157,9 @@ namespace TransmissionSimulation.Components
                 // - expired frame sequence number
                 // - cancel : cancel with a 
 
-                if (transmitter.TransmitterReady(stationType) && HighPriorityFrames.Count > 0)
+                bool transmitterReady = transmitter.TransmitterReady(stationType);
+                bool transmitterDataReceived = transmitter.DataReceived(stationType);
+                if (transmitterReady && HighPriorityFrames.Count > 0)
                 {
                     // Gets next high priority frame
                     Frame frame = HighPriorityFrames.Dequeue();
@@ -168,7 +170,7 @@ namespace TransmissionSimulation.Components
                     // Send the frame
                     SendFrame(frame);
                 }
-                else if (transmitter.TransmitterReady(stationType) && FrameReadyToSend) // - ready to send on wire and frame to send available
+                else if (transmitterReady && FrameReadyToSend) // - ready to send on wire and frame to send available
                 {
                     // TODO check this, we need to send the right Ack, especially when there is no Ack at all!!! The sender must not send something invalid
                     UInt16 ack = DecrementSequenceNumber(NextAwaitedFrameSequenceNumber);
@@ -192,7 +194,7 @@ namespace TransmissionSimulation.Components
                     // Increment the frame to send sequence number because we have sent the current one.
                     NextFrameToSendSequenceNumber = IncrementSequenceNumber(NextFrameToSendSequenceNumber);
                 }
-                else if (transmitter.TransmitterReady(stationType) && sendAck) // - ack timer (receiver : we weren't able to send the ack with a data frame, we need to send it now!)
+                else if (transmitterReady && sendAck) // - ack timer (receiver : we weren't able to send the ack with a data frame, we need to send it now!)
                 {
                     // TODO (later) Use HighPriorityQueue instead of doing it here with a boolean (sendAck). This could unify logic, but watch out for concurrency!!
 
@@ -208,7 +210,7 @@ namespace TransmissionSimulation.Components
 
                     SendFrame(ackFrame);
                 }
-                else if (transmitter.DataReceived(stationType)) // data received on wire (correct or corrupt)
+                else if (transmitterDataReceived) // data received on wire (correct or corrupt)
                 {
                     Frame frameReceived = GetFrameFromTransmitter();
 
@@ -266,7 +268,6 @@ namespace TransmissionSimulation.Components
                                 frameReceived.Data.CopyTo(frameData, 0);
                                 fileStream.Write(frameData, 0, frameReceived.Data.Length / 8);
                                 fileStream.Flush();
-                                WriteCursorInFile += frameReceived.Data.Length / 8;
 
                                 // Remove the frame from the input buffer
                                 inputBuffer.Remove(NextAwaitedFrameSequenceNumber % BufferSize);
@@ -371,6 +372,11 @@ namespace TransmissionSimulation.Components
             BitArray frameBitArray = frame.GetFrameAsByteArray();
             BitArray encodedFrameBitArray = HammingHelper.Encrypt(frameBitArray);
 
+            // Notify subscriber that frame is being sent
+            sendFrameDelegate(frame, true);
+
+            Console.WriteLine("SendFrame : id={0}, type={1}, ack={2}, data lenght={3}", frame.Id, frame.Type.ToString(), frame.Ack, frame.Data.Count);
+
             // Send the data
             transmitter.SendData(encodedFrameBitArray, stationType);
         }
@@ -383,7 +389,6 @@ namespace TransmissionSimulation.Components
             byte[] data = new byte[DataSizeInFrame];
             int actuallyReadBytesAmount = fileStream.Read(data, 0, DataSizeInFrame);
             BitArray dataBitArray = new BitArray(data);
-            ReadCursorInFile += actuallyReadBytesAmount;
 
             return new Frame(numSequence, Constants.FrameType.Data, ack, dataBitArray);
         }
@@ -416,6 +421,11 @@ namespace TransmissionSimulation.Components
 
                 // Converts BitArray to Frame
                 Frame frame = Frame.GetFrameFromBitArray(frameBitArray);
+
+                // Notify subscriber that frame is being received
+                sendFrameDelegate(frame, false);
+
+                Console.WriteLine("Receive frame : id={0}, type={1}, ack={2}, data lenght={3}", frame.Id, frame.Type.ToString(), frame.Ack, frame.Data.Count);
 
                 return frame;
             }
