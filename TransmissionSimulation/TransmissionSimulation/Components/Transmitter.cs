@@ -116,7 +116,7 @@ namespace TransmissionSimulation.Components
 		/// <param name="transferData">Data to insert errors into.</param>
 		private BitArray InjectErrors(BitArray transferData)
 		{
-            if (indicesInversions != null)
+            if (indicesInversions != null && indicesInversions.Count > 0)
             {
                 foreach(var i in indicesInversions)
                 {
