@@ -12,37 +12,38 @@ namespace TransmissionSimulationTests.Helpers
         public void TestEncrypt()
         {
 
-            // #1 case
+            // #1 case 1000001 -> [1]00100001001
             BitArray bitArray = new BitArray(7)
             {
                 [0] = true,
                 [6] = true
             };
 
-            BitArray bitArrayExpected = new BitArray(11)
+            BitArray bitArrayExpected = new BitArray(12)
             {
-                [2] = true,
-                [7] = true,
-                [10] = true
+                [0] = true,
+                [3] = true,
+                [8] = true,
+                [11] = true
             };
 
             BitArray bitArrayoutput = HammingHelper.Encrypt(bitArray);
             Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArrayExpected), HammingHelper.BitArrayToDigitString(bitArrayoutput));
 
             
-            // #2 case
+            // #2 case 1011 -> [0]0110011
             bitArray = new BitArray(4)
             {
                 [0] = true,
                 [2] = true,
                 [3] = true
             };
-            bitArrayExpected = new BitArray(7)
+            bitArrayExpected = new BitArray(8)
             {
-                [1] = true,
                 [2] = true,
-                [5] = true,
-                [6] = true
+                [3] = true,
+                [6] = true,
+                [7] = true
             };
 
             bitArrayoutput = HammingHelper.Encrypt(bitArray);
@@ -52,12 +53,13 @@ namespace TransmissionSimulationTests.Helpers
         [TestMethod]
         public void TestDecrypt()
         {
-            // #1 case
-            BitArray bitArray = new BitArray(11)
+            // #1 case [1]00100001001 -> 1000001
+            BitArray bitArray = new BitArray(12)
             {
-                [2] = true,
-                [7] = true,
-                [10] = true,
+                [0] = true,
+                [3] = true,
+                [8] = true,
+                [11] = true,
             };
 
             BitArray bitArrayExpected = new BitArray(7)
@@ -69,49 +71,95 @@ namespace TransmissionSimulationTests.Helpers
             BitArray bitArrayoutput = HammingHelper.Decrypt(bitArray);
             Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArrayExpected), HammingHelper.BitArrayToDigitString(bitArrayoutput));
 
-            // #1 case with 1 error
-            bitArray = new BitArray(11)
-            {
-                //[2] = true, // this is the error
-                [7] = true,
-                [10] = true,
-            };
+            //// #1 case with 1 error
+            //bitArray = new BitArray(11)
+            //{
+            //    //[2] = true, // this is the error
+            //    [7] = true,
+            //    [10] = true,
+            //};
 
-            bitArrayExpected = new BitArray(7)
+            //bitArrayExpected = new BitArray(7)
+            //{
+            //    [0] = true,
+            //    [6] = true,
+            //};
+
+            //bitArrayoutput = HammingHelper.Decrypt(bitArray);
+            //Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArrayExpected), HammingHelper.BitArrayToDigitString(bitArrayoutput));
+
+            //// #2 case [0]0110011 -> 1011
+            //bitArray = new BitArray(8)
+            //{
+            //    [2] = true,
+            //    [3] = true,
+            //    [6] = true,
+            //    [7] = true
+            //};
+
+            //bitArrayExpected = new BitArray(4)
+            //{
+            //    [0] = true,
+            //    [2] = true,
+            //    [3] = true
+            //};
+
+            //bitArrayoutput = HammingHelper.Decrypt(bitArray);
+            //Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArrayExpected), HammingHelper.BitArrayToDigitString(bitArrayoutput));
+
+        }
+
+        [TestMethod]
+        public void TestEncryptDecryptManager()
+        {
+            // #1 case 10000010 (8 bits)
+            BitArray bitArray = new BitArray(8)
             {
                 [0] = true,
-                [6] = true,
-            };
-
-            bitArrayoutput = HammingHelper.Decrypt(bitArray);
-            Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArrayExpected), HammingHelper.BitArrayToDigitString(bitArrayoutput));
-
-            // #2 case
-            bitArray = new BitArray(7)
-            {
-                [1] = true,
-                [2] = true,
-                [5] = true,
                 [6] = true
             };
 
-            bitArrayExpected = new BitArray(4)
-            {
-                [0] = true,
-                [2] = true,
-                [3] = true
-            };
+            BitArray bitArrayEncrypt = HammingHelper.EncryptManager(bitArray);
+            BitArray bitArrayDecrypt = HammingHelper.Decrypt(bitArrayEncrypt);
 
-            bitArrayoutput = HammingHelper.Decrypt(bitArray);
-            Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArrayExpected), HammingHelper.BitArrayToDigitString(bitArrayoutput));
+            Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArray), HammingHelper.BitArrayToDigitString(bitArrayDecrypt));
+
+
+            //// # Random case
+            //// TODO
+            //bitArray = new BitArray(50)
+            //{
+            //    [0] = true,
+            //    [6] = true,
+            //    [8] = true,
+            //    [18] = true,
+            //    [20] = true,
+            //    [29] = true,
+            //};
+
+            //bitArrayEncrypt = HammingHelper.Encrypt(bitArray);
+            //bitArrayDecrypt = HammingHelper.Decrypt(bitArrayEncrypt);
+
+            //Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArray), HammingHelper.BitArrayToDigitString(bitArrayDecrypt));
 
         }
 
         [TestMethod]
         public void TestGetDataSize()
         {
-            Assert.AreEqual(7, HammingHelper.GetDataSize(11));
-            Assert.AreEqual(4, HammingHelper.GetDataSize(7));
+            //Assert.AreEqual(4, HammingHelper.GetDataSize(8));
+            //Assert.AreEqual(7, HammingHelper.GetDataSize(12));
+            Assert.AreEqual(8, HammingHelper.GetDataSize(13));
+            //Assert.AreEqual(512, HammingHelper.GetDataSize(128*8));
+        }
+
+        [TestMethod]
+        public void TestGetTotalSize()
+        {
+            //Assert.AreEqual(8, HammingHelper.GetTotalSize(4));
+            //Assert.AreEqual(12, HammingHelper.GetTotalSize(7));
+            Assert.AreEqual(13, HammingHelper.GetTotalSize(8));
+            Assert.AreEqual(26, HammingHelper.GetTotalSize(16));
         }
 
         [TestMethod]
