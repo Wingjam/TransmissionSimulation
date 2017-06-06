@@ -178,12 +178,14 @@ namespace TransmissionSimulation.Components
             if (station == Constants.Station.Source)
             {
                 sendingSource = data;
-                readyToSendSource = false;
+                //Use property to call transfer
+                ReadyToSendSource = false;
             }
             else
             {
                 sendingDest = data;
-                readyToSendDest = false;
+				//Use property to call transfer
+				ReadyToSendDest = false;
             }
         }
 
@@ -201,12 +203,14 @@ namespace TransmissionSimulation.Components
                 if (station == Constants.Station.Source)
                 {
                     data = receivingSource;
-                    dataReceivedSource = false;
+					//Use property to call transfer
+					DataReceivedSource = false;
                 }
                 else
                 {
                     data = receivingDest;
-                    dataReceivedDest = false;
+					//Use property to call transfer
+					DataReceivedDest = false;
                 }
             }
             else
