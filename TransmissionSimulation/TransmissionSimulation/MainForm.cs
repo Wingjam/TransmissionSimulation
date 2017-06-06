@@ -22,6 +22,7 @@ namespace TransmissionSimulation
         private Thread receiveThread;
         private Transmitter cable;
         private NumericUpDown[] errorsPositions;
+        delegate void UpdateDataDelegate(Frame frameToShow, bool isSent);
 
         public MainForm(ProgramOption progOption)
         {
@@ -70,7 +71,17 @@ namespace TransmissionSimulation
 
         private void ShowFrame(Frame frameToShow, bool isSent)
         {
-            txtDataSend.AppendText(frameToShow.ToString());
+            //based on msdn doc: https://msdn.microsoft.com/en-us/library/ms171728(v=vs.110).aspx
+            RichTextBox textBox = isSent ? txtDataSend : txtReception;
+            if (textBox.InvokeRequired)
+            {
+                UpdateDataDelegate d = ShowFrame;
+                Invoke(d, frameToShow, isSent);
+            }
+            else
+            {
+                textBox.AppendText(frameToShow.ToString());
+            }
         }
     }
 }
