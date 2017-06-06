@@ -179,6 +179,7 @@ namespace TransmissionSimulation.Components
         /// <param name="station">Station tto send data from.</param>
         public void SendData(BitArray data, Constants.Station station)
         {
+            mutex.WaitOne();
             if (station == Constants.Station.Source)
             {
                 sendingSource = data;
@@ -189,6 +190,7 @@ namespace TransmissionSimulation.Components
                 sendingDest = data;
 				ReadyToSendDest = false;
             }
+            mutex.ReleaseMutex();
         }
 
         /// <summary>
@@ -198,6 +200,8 @@ namespace TransmissionSimulation.Components
         /// <param name="station">Station that gets available data.</param>
         public BitArray GetData(Constants.Station station)
         {
+            mutex.WaitOne();
+
             BitArray data = null;
 
             if (DataReceived(station))
@@ -217,6 +221,8 @@ namespace TransmissionSimulation.Components
             {
                 throw new InvalidOperationException("Data was not ready, use DataReceived() first.");
             }
+
+            mutex.ReleaseMutex();
 
             return data;
         }
