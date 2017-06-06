@@ -370,7 +370,7 @@ namespace TransmissionSimulation.Components
         {
             // Prepare the frame to be sent on the wire (converts to BitArray and encode for error control with Hamming)
             BitArray frameBitArray = frame.GetFrameAsByteArray();
-            BitArray encodedFrameBitArray = HammingHelper.EncryptManager(frameBitArray);
+            BitArray encodedFrameBitArray = HammingHelper.Encrypt(frameBitArray);
 
             // Notify subscriber that frame is being sent
             sendFrameDelegate(frame, true);
@@ -414,7 +414,7 @@ namespace TransmissionSimulation.Components
                 }
 
                 // Decode the frame
-                BitArray frameBitArray = HammingHelper.DecryptManager(encodedFrameBitArray);
+                BitArray frameBitArray = HammingHelper.Decrypt(encodedFrameBitArray);
 
                 // Converts BitArray to Frame
                 Frame frame = Frame.GetFrameFromBitArray(frameBitArray);
