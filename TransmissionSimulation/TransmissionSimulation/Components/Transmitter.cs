@@ -28,7 +28,7 @@ namespace TransmissionSimulation.Components
             set
             {
                 readyToSendSource = value;
-                CheckForTransferConditions();
+                Task.Run(() => TransferFrame());
             }
         }
         public bool DataReceivedDest
@@ -37,7 +37,7 @@ namespace TransmissionSimulation.Components
             set
             {
                 dataReceivedDest = value;
-                CheckForTransferConditions();
+                Task.Run(() => TransferFrame());
             }
         }
         public bool ReadyToSendDest
@@ -46,7 +46,7 @@ namespace TransmissionSimulation.Components
             set
             {
                 readyToSendDest = value;
-                CheckForTransferConditions();
+                Task.Run(() => TransferFrame());
             }
         }
         public bool DataReceivedSource
@@ -55,7 +55,7 @@ namespace TransmissionSimulation.Components
             set
             {
                 dataReceivedSource = value;
-                CheckForTransferConditions();
+                Task.Run(() => TransferFrame());
             }
         }
 
@@ -77,10 +77,9 @@ namespace TransmissionSimulation.Components
         }
 
         /// <summary>
-        /// Checks for transfer conditions.
-        /// Loops in a separate thread.
+        /// Transfers the frame if needed
         /// </summary>
-        private void CheckForTransferConditions()
+        private void TransferFrame()
         {
             mutex.WaitOne();
 
