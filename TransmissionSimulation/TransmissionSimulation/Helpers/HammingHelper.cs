@@ -24,25 +24,22 @@ namespace TransmissionSimulation.Helpers
 
         private static BitArray HammingManager(BitArray bitArrayInput, int magicNumber, Func<int, int> OutputSize, Func<BitArray, BitArray> Hamming)
         {
-            if (bitArrayInput.Length % magicNumber != 0)
-                throw new ArgumentException("BitArray size must be multiple of " + magicNumber);
+            if (bitArrayInput.Length % 8 != 0)
+                throw new ArgumentException("BitArray size must be multiple of 8");
 
             Boolean[] arrayOuput = new Boolean[OutputSize(bitArrayInput.Length)];
 
-            for (int i = 0; i < bitArrayInput.Length / magicNumber; i++)
+            for (int i = 0; i < bitArrayInput.Length / 8; i++)
             {
-                // Create a new BitArray of size magicNumber
-                Boolean[] allBits = new Boolean[bitArrayInput.Length];
-                Boolean[] bits = new Boolean[magicNumber];
-                bitArrayInput.CopyTo(allBits, 0);
-                Array.Copy(allBits, i * magicNumber, bits, 0, magicNumber);
-
+                // Create a new BitArray of size 8
+                Boolean[] bits = new Boolean[8];
+                bitArrayInput.CopyTo(bits, i * 8);
                 BitArray tmpBitArray = new BitArray(bits);
 
-                // Encrypt/Decrypt it
+                // Encrypt it
                 tmpBitArray = Hamming(tmpBitArray);
                 // Add the output to the arrayOutput
-                tmpBitArray.CopyTo(arrayOuput, i * tmpBitArray.Length);
+                tmpBitArray.CopyTo(arrayOuput, i * 8);
             }
 
             ////Last bits
@@ -55,7 +52,7 @@ namespace TransmissionSimulation.Helpers
             return new BitArray(arrayOuput);
         }
 
-        private static BitArray Encrypt(BitArray bitArrayInput)
+        public static BitArray Encrypt(BitArray bitArrayInput)
         {
             int indiceInput = 0;
 
@@ -101,7 +98,7 @@ namespace TransmissionSimulation.Helpers
             return bitArrayOutput;
         }
 
-        private static BitArray Decrypt(BitArray bitArrayInput)
+        public static BitArray Decrypt(BitArray bitArrayInput)
         {
             int errorSyndrome = 0;
 
