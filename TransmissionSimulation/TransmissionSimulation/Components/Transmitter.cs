@@ -155,7 +155,7 @@ namespace TransmissionSimulation.Components
         /// <param name="station">Station to check for transmitter ready.</param>
         public bool TransmitterReady(Constants.Station station)
         {
-            return (station == Constants.Station.Source) ? readyToSendSource : readyToSendDest;
+            return (station == Constants.Station.Source) ? ReadyToSendSource : ReadyToSendDest;
         }
 
         /// <summary>
@@ -165,7 +165,7 @@ namespace TransmissionSimulation.Components
         /// <param name="station">Station that checks for data received.</param>
         public bool DataReceived(Constants.Station station)
         {
-            return (station == Constants.Station.Source) ? dataReceivedSource : dataReceivedDest;
+            return (station == Constants.Station.Source) ? DataReceivedSource : DataReceivedDest;
         }
 
         /// <summary>
@@ -178,13 +178,11 @@ namespace TransmissionSimulation.Components
             if (station == Constants.Station.Source)
             {
                 sendingSource = data;
-                //Use property to call transfer
                 ReadyToSendSource = false;
             }
             else
             {
                 sendingDest = data;
-				//Use property to call transfer
 				ReadyToSendDest = false;
             }
         }
@@ -203,13 +201,11 @@ namespace TransmissionSimulation.Components
                 if (station == Constants.Station.Source)
                 {
                     data = receivingSource;
-					//Use property to call transfer
 					DataReceivedSource = false;
                 }
                 else
                 {
                     data = receivingDest;
-					//Use property to call transfer
 					DataReceivedDest = false;
                 }
             }
