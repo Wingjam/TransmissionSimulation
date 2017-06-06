@@ -6,7 +6,7 @@ using TransmissionSimulation.Ressources;
 
 namespace TransmissionSimulation.Components
 {
-    class Transmitter : ITransmitter
+    public class Transmitter : ITransmitter
     {
         private static Mutex mutex = new Mutex();
         private BitArray sendingSource;
@@ -159,7 +159,7 @@ namespace TransmissionSimulation.Components
         /// <param name="station">Station to check for transmitter ready.</param>
         public bool TransmitterReady(Constants.Station station)
         {
-            return (station == Constants.Station.Source) ? ReadyToSendSource : ReadyToSendDest;
+            return (station == Constants.Station.Source) ? ReadyToSendSource && !DataReceivedDest : ReadyToSendDest && !DataReceivedSource;
         }
 
         /// <summary>
@@ -176,20 +176,27 @@ namespace TransmissionSimulation.Components
         /// Sends the data from the station.
         /// </summary>
         /// <param name="data">Data to send.</param>
-        /// <param name="station">Station tto send data from.</param>
+        /// <param name="station">Station to send data from.</param>
         public void SendData(BitArray data, Constants.Station station)
         {
             mutex.WaitOne();
-            if (station == Constants.Station.Source)
+
+
+            if (station == Constants.Station.Source && !DataReceivedDest)
             {
                 sendingSource = data;
                 ReadyToSendSource = false;
             }
-            else
+            else if (station == Constants.Station.Dest && !DataReceivedSource)
             {
                 sendingDest = data;
-				ReadyToSendDest = false;
+                ReadyToSendDest = false;
             }
+            else
+            {
+                throw new InvalidOperationException("Station was not ready to send, use GetData() first.");
+            }
+
             mutex.ReleaseMutex();
         }
 
