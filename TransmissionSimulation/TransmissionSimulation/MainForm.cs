@@ -48,10 +48,13 @@ namespace TransmissionSimulation
             //Start the threads
             //TODO ajouter dequoi pour envoyer des erreurs a raph
             cable = new Transmitter();
-            //Station sendStation = new Station(Constants.Station.Source, cable, progOption.BufferSize, progOption.Timeout * 1000, fileToCopie);
-            //Station receiveStation = new Station(Constants.Station.Dest, cable, progOption.BufferSize, progOption.Timeout * 1000, destinationFile);
-            //sendThread = new Thread(sendStation.Start);
-            //receiveThread = new Thread(receiveStation.Start);
+            Station sendStation = new Station(Constants.Station.Source, cable, progOption.BufferSize, progOption.Timeout * 1000, fileToCopie);
+            Station receiveStation = new Station(Constants.Station.Dest, cable, progOption.BufferSize, progOption.Timeout * 1000, destinationFile);
+            sendThread = new Thread(sendStation.Start);
+            receiveThread = new Thread(receiveStation.Start);
+
+            sendThread.Start();
+            receiveThread.Start();
         }
 
         private void btnInject_Click(object sender, EventArgs e)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TransmissionSimulation.Helpers;
 
 namespace TransmissionSimulation.Ressources
 {
@@ -16,6 +17,11 @@ namespace TransmissionSimulation.Ressources
         /// Frame size in bytes
         /// </summary>
         public const int FrameSize = 128;
+
+        /// <summary>
+        /// Frame padding in bits
+        /// </summary>
+        public static int FramePadding = FrameSize - (int)(HammingHelper.GetDataSize(FrameSize * 8) / 8);
 
         /// <summary>
         /// The default delay of transfer in deciseconds (1/10 second)
