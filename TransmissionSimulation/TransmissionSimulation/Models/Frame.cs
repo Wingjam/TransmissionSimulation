@@ -1,27 +1,39 @@
 ﻿using System;
 using System.Collections;
+using static TransmissionSimulation.Ressources.Constants;
 
 namespace TransmissionSimulation.Models
 {
     class Frame
     {
-        private static UInt16 lastId = 0;
+        static public int HeaderSize()
+        {
+            // id + ack + type
+            return sizeof(UInt16) * 2 + sizeof(FrameType);
+        }
 
         /// <summary>
-        /// Constructor with the id auto generated. Used for transmitting information
+        /// Default constructor creating a Data Frame with an id set to 0
         /// </summary>
-        /// <param name="data"></param>
-        public Frame(BitArray data) : this(LastId(), data, false, false)
+        public Frame() : this(0, FrameType.Data, 0, null)
+        { }
+
+        /// <summary>
+        /// Constructor with FrameType only
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="type"></param>
+        /// <param name="ack"></param>
+        public Frame(UInt16 id, FrameType type, UInt16 ack) : this(id, type, ack, null)
         {
         }
 
         /// <summary>
-        /// Constructor for the response, giving the id of the frame.
+        /// Constructor for Ack and Nak frames
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="data"></param>
-        /// <param name="isAck"></param>
-        public Frame(UInt16 id, BitArray data, bool isAck) : this(id, data, isAck, !isAck)
+        /// <param name="type"></param>
+        /// <param name="ack"></param>
+        public Frame(FrameType type, UInt16 ack) : this(0, type, ack, null)
         {
         }
 
@@ -29,36 +41,23 @@ namespace TransmissionSimulation.Models
         /// Constructor containg all the information.
         /// </summary>
         /// <param name="id"></param>
+        /// <param name="type"></param>
+        /// <param name="ack"></param>
         /// <param name="data"></param>
-        /// <param name="isAck"></param>
-        /// <param name="isNak"></param>
-        private Frame(UInt16 id, BitArray data, bool isAck, bool isNak)
+        public Frame(UInt16 id, FrameType type, UInt16 ack, BitArray data)
         {
             Id = id;
+            Type = type;
             Data = data;
-            IsAck = isAck;
-            IsNak = isNak;
+            Ack = ack;
         }
 
-        public int HeaderSize()
-        {
-            //id + isAck + isNak
-            return sizeof(UInt16) + sizeof(bool) + sizeof(bool);
-        }
+        public UInt16 Id { get; set; }
 
-        public UInt16 Id { get; }
+        public FrameType Type { get; set; }
 
-        public BitArray Data { get; }
+        public BitArray Data { get; set; }
 
-        public bool IsAck { get; }
-
-        public bool IsNak { get; }
-
-
-        private static UInt16 LastId()
-        {
-            //TODO remettre a 0 quand on atteint le buffersize*2
-            return lastId++;
-        }
+        public UInt16 Ack { get; set; }
     }
 }

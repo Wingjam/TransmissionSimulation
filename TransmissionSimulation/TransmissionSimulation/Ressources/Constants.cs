@@ -10,6 +10,8 @@ namespace TransmissionSimulation.Ressources
     {
         public enum Station { Source, Dest }
 
+        public enum FrameType { Data, Ack, Nak }
+
         /// <summary>
         /// Frame size in bytes
         /// </summary>
