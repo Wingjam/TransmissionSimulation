@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using TransmissionSimulation.Components;
+using TransmissionSimulation.Models;
 using TransmissionSimulation.Ressources;
 
 namespace TransmissionSimulation
@@ -21,6 +22,8 @@ namespace TransmissionSimulation
         private Thread receiveThread;
         private Transmitter cable;
         private NumericUpDown[] errorsPositions;
+
+        public delegate void ShowFrameDelegate(Frame frameToShow, bool isSent);
 
         public MainForm(ProgramOption progOption)
         {
@@ -48,8 +51,8 @@ namespace TransmissionSimulation
             //Start the threads
             //TODO ajouter dequoi pour envoyer des erreurs a raph
             cable = new Transmitter();
-            Station sendStation = new Station(Constants.Station.Source, cable, progOption.BufferSize, progOption.Timeout * 1000, fileToCopie);
-            Station receiveStation = new Station(Constants.Station.Dest, cable, progOption.BufferSize, progOption.Timeout * 1000, destinationFile);
+            Station sendStation = new Station(Constants.Station.Source, cable, progOption.BufferSize, progOption.Timeout * 1000, fileToCopie, ShowFrame);
+            Station receiveStation = new Station(Constants.Station.Dest, cable, progOption.BufferSize, progOption.Timeout * 1000, destinationFile, ShowFrame);
             sendThread = new Thread(sendStation.Start);
             receiveThread = new Thread(receiveStation.Start);
 
@@ -67,6 +70,11 @@ namespace TransmissionSimulation
                     cable.IndicesInversions.Add(errorPosition.Value);
                 }
             }
+        }
+
+        private void ShowFrame(Frame frameToShow, bool isSent)
+        {
+            txtDataSend.AppendText(frameToShow.ToString());
         }
     }
 }

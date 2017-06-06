@@ -7,7 +7,7 @@ using static TransmissionSimulation.Ressources.Constants;
 namespace TransmissionSimulation.Models
 {
     [Serializable]
-    class Frame
+    public class Frame
     {
         static public int HeaderSize()
         {
