@@ -23,8 +23,6 @@ namespace TransmissionSimulation
         private Transmitter cable;
         private NumericUpDown[] errorsPositions;
 
-        public delegate void ShowFrameDelegate(Frame frameToShow, bool isSent);
-
         public MainForm(ProgramOption progOption)
         {
             this.progOption = progOption;
@@ -49,7 +47,6 @@ namespace TransmissionSimulation
             FileStream fileToCopie = File.Open(progOption.FileToCopie, FileMode.Open, FileAccess.Read);
             FileStream destinationFile = File.Open(progOption.DestinationFile, FileMode.OpenOrCreate, FileAccess.Write);
             //Start the threads
-            //TODO ajouter dequoi pour envoyer des erreurs a raph
             cable = new Transmitter();
             Station sendStation = new Station(Constants.Station.Source, cable, progOption.BufferSize, progOption.Timeout * 1000, fileToCopie, ShowFrame);
             Station receiveStation = new Station(Constants.Station.Dest, cable, progOption.BufferSize, progOption.Timeout * 1000, destinationFile, ShowFrame);
@@ -62,7 +59,6 @@ namespace TransmissionSimulation
 
         private void btnInject_Click(object sender, EventArgs e)
         {
-            //TODO call l'injection d'erreur(s) a raph
             foreach (NumericUpDown errorPosition in errorsPositions)
             {
                 if (errorPosition.Validate() && errorPosition.Value != -1)

@@ -70,7 +70,7 @@ namespace TransmissionSimulation.Models
             BitConverter.GetBytes((UInt16)Id).CopyTo(frame, 0);
             BitConverter.GetBytes((Int32)Type).CopyTo(frame, sizeof(UInt16));
             BitConverter.GetBytes((UInt16)Ack).CopyTo(frame, sizeof(UInt16) + sizeof(Int32));
-                
+
             Data.CopyTo(frame, Frame.HeaderSize());
 
             return new BitArray(frame);
@@ -81,7 +81,7 @@ namespace TransmissionSimulation.Models
             Frame frame = new Frame();
             byte[] frameByteArray = new byte[bitArray.Length];
             bitArray.CopyTo(frameByteArray, 0);
-            
+
             frame.Id = (UInt16)BitConverter.ToInt16(frameByteArray, 0);
             frame.Type = (FrameType)BitConverter.ToInt32(frameByteArray, sizeof(UInt16));
             frame.Ack = (UInt16)BitConverter.ToInt16(frameByteArray, sizeof(UInt16) + sizeof(Int32));
@@ -92,6 +92,26 @@ namespace TransmissionSimulation.Models
             frame.Data = new BitArray(data);
 
             return frame;
+        }
+
+        public override string ToString()
+        {
+            string value = Id.ToString("000");
+            switch (Type)
+            {
+                case FrameType.Ack:
+                    value += "Ack ";
+                    break;
+                case FrameType.Nak:
+                    value += "Nak ";
+                    break;
+                case FrameType.Data:
+                    value += "Data ";
+                    break;
+            }
+            value += "Ack:" + Ack.ToString("00");
+            value += Data.ToString();
+            return value;
         }
     }
 }

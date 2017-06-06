@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TransmissionSimulation.Helpers;
+  using TransmissionSimulation.Models;
 
 namespace TransmissionSimulation.Ressources
 {
@@ -32,5 +33,8 @@ namespace TransmissionSimulation.Ressources
         /// The maximum of error that can be inject into a frame.
         /// </summary>
         public const int MaximumOfErrorToInject = 2;
+
+
+        public delegate void ShowFrameDelegate(Frame frameToShow, bool isSent);
     }
 }

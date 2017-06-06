@@ -101,7 +101,7 @@ namespace TransmissionSimulation.Components
         ConcurrentDictionary<UInt16, System.Timers.Timer> TimeoutTimers { get; set; }
 
 
-        public Station(Constants.Station stationType, ITransmitter transmitter, int bufferSize, int timeoutInMs, FileStream fileStream, MainForm.ShowFrameDelegate sendFrame)
+        public Station(Constants.Station stationType, ITransmitter transmitter, int bufferSize, int timeoutInMs, FileStream fileStream, Constants.ShowFrameDelegate sendFrame)
         {
             this.stationType = stationType;
             this.transmitter = transmitter;
