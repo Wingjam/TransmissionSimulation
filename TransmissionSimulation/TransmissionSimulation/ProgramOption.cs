@@ -13,10 +13,10 @@ namespace TransmissionSimulation
         [Option('e', "Detect", DefaultValue = true, HelpText = "If true, only detect the errors. If false, correct the errors.")]
         public bool DetectionOnly { get; set; }
 
-        [Option('c', "copy", Required = true, HelpText = "Input file to be copied.")]
+        [Option('c', "copy", DefaultValue = "test.txt", HelpText = "Input file to be copied.")]
         public string FileToCopie { get; set; }
 
-        [Option('d', "destination", Required = true, HelpText = "Destination file of the copy.")]
+        [Option('d', "destination", DefaultValue = "test.received.txt", HelpText = "Destination file of the copy.")]
         public string DestinationFile { get; set; }
     }
 }
