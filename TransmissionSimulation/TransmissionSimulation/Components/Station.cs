@@ -47,11 +47,19 @@ namespace TransmissionSimulation.Components
                 return TimeoutInMs / 2;
             } }
 
+        /// <summary>
+        /// Number of bits at the end of an encoded frame to ensure the frame is of the right size.
+        /// </summary>
+        int EncodedFramePadding { get; set; }
+
 
         /* Internal fields for treatment */
 
         /* Sender fields */
-        UInt16 NextAwaitedAckSequenceNumber { get; set; }
+        /// <summary>
+        /// Sequence number of the first frame of the current window. We are awaiting an ack for this frame.
+        /// </summary>
+        UInt16 FirstFrameSent { get; set; }
         UInt16 NextFrameToSendSequenceNumber { get; set; }
         bool FrameReadyToSend {
             get {
@@ -64,7 +72,7 @@ namespace TransmissionSimulation.Components
                 bool fileNotEntirelySent = fileStream.Position < fileStream.Length;
 
                 // We can send another frame if our output window isn't full. Valid only it we are sending a data frame. An Ack frame doesn't need this validation.
-                int outputWindowSize = NextFrameToSendSequenceNumber - NextAwaitedAckSequenceNumber;
+                int outputWindowSize = NextFrameToSendSequenceNumber - FirstFrameSent;
                 if (outputWindowSize < 0)
                 {
                     outputWindowSize += MaxSequence;
@@ -75,15 +83,15 @@ namespace TransmissionSimulation.Components
 
 
         /* Receiver fields */
-        UInt16 NextAwaitedFrameSequenceNumber { get; set; }
-        UInt16 LastFrameToSaveSequenceNumber
+        UInt16 NextFrameToReceive { get; set; }
+        UInt16 LastFrameToReceive
         {
-            get { return (UInt16)(NextAwaitedFrameSequenceNumber + BufferSize); }
+            get { return (UInt16)(NextFrameToReceive + BufferSize); }
         }
         UInt16 LastFrameSequenceNumberForNak { get; set; }
         bool NoNakSentForNextAwaitedFrame
         {
-            get { return LastFrameSequenceNumberForNak != NextAwaitedFrameSequenceNumber; }
+            get { return LastFrameSequenceNumberForNak != NextFrameToReceive; }
         }
 
         /// <summary>
@@ -100,7 +108,13 @@ namespace TransmissionSimulation.Components
         ConcurrentDictionary<UInt16, System.Timers.Timer> TimeoutTimers { get; set; }
 
 
-        public Station(Constants.Station stationType, ITransmitter transmitter, int bufferSize, int timeoutInMs, FileStream fileStream, Constants.ShowFrameDelegate sendFrame)
+        public Station(
+            Constants.Station stationType,
+            ITransmitter transmitter,
+            int bufferSize,
+            int timeoutInMs,
+            FileStream fileStream,
+            Constants.ShowFrameDelegate sendFrame)
         {
             this.stationType = stationType;
             this.transmitter = transmitter;
@@ -113,14 +127,16 @@ namespace TransmissionSimulation.Components
 
             // Initialize constants
             int frameSizeBeforeHamming = HammingHelper.GetDataSize(Constants.FrameSize * 8) / 8;
+            int realBitCount = HammingHelper.GetTotalSize(frameSizeBeforeHamming * 8);
+            EncodedFramePadding = Constants.FrameSize * 8 - realBitCount;
             int frameHeaderSize = Frame.HeaderSize();
             DataSizeInFrame = frameSizeBeforeHamming - frameHeaderSize;
             MaxSequence = (UInt16)(bufferSize * 2 - 1);
 
             // Initialize fields
-            NextAwaitedAckSequenceNumber = 0;
+            FirstFrameSent = 0;
             NextFrameToSendSequenceNumber = 0;
-            NextAwaitedFrameSequenceNumber = 0;
+            NextFrameToReceive = 0;
 
             // Since frames cannot use MaxSequence as a sequence number, we use it for LastFrameSequenceNumberForNak.
             // This is meant to ensure that no Frame matches this field if there was no Nak sent.
@@ -140,7 +156,15 @@ namespace TransmissionSimulation.Components
         {
             while (true)
             {
-                Thread.Sleep(1000);
+                //Thread.Sleep(1000);
+
+
+
+
+
+
+
+
                 //events (in order of priority):
                 // - high priority frame ready (examples : nak is ready to be sent, we need to resend a frame for which a nak was received, we need to resend a frame for which the timeout occured)
                 // - ready to send on wire and frame to send available
@@ -166,7 +190,7 @@ namespace TransmissionSimulation.Components
                     Frame frame = HighPriorityFrames.Dequeue();
 
                     // Update frame Ack to latest Ack
-                    frame.Ack = DecrementSequenceNumber(NextAwaitedFrameSequenceNumber);
+                    frame.Ack = DecrementSequenceNumber(NextFrameToReceive);
 
                     if (frame.Type != Constants.FrameType.Data || outputBuffer.ContainsKey(frame.Id % BufferSize))
                     {
@@ -177,7 +201,7 @@ namespace TransmissionSimulation.Components
                 else if (transmitterReady && FrameReadyToSend) // - ready to send on wire and frame to send available
                 {
                     // TODO check this, we need to send the right Ack, especially when there is no Ack at all!!! The sender must not send something invalid
-                    UInt16 ack = DecrementSequenceNumber(NextAwaitedFrameSequenceNumber);
+                    UInt16 ack = DecrementSequenceNumber(NextFrameToReceive);
                     Frame nextFrame = BuildDataFrame(NextFrameToSendSequenceNumber, ack);
 
                     // if we are sending a frame, we have the Ack in it, so we do not need to send the ack later anymore. We stop the timer.
@@ -203,7 +227,7 @@ namespace TransmissionSimulation.Components
                     // TODO (later) Use HighPriorityQueue instead of doing it here with a boolean (sendAck). This could unify logic, but watch out for concurrency!!
 
                     // Build an Ack frame
-                    Frame ackFrame = new Frame(Constants.FrameType.Ack, DecrementSequenceNumber(NextAwaitedFrameSequenceNumber));
+                    Frame ackFrame = new Frame(Constants.FrameType.Ack, DecrementSequenceNumber(NextFrameToReceive));
 
                     // TODO Check to make sure we do not need to Stop the timer.
                     // Early reflexion : should not do it -> if we are here it's because the timer ticked and flipped the SendAck to true, so it stopped itself. Logically, we shouldn't start it again if the SendAck is true, so we know it's off.
@@ -224,10 +248,10 @@ namespace TransmissionSimulation.Components
                         if (NoNakSentForNextAwaitedFrame)
                         {
                             // Set the LastFrameSequenceNumberForNak to the currently awaited frame's sequence number
-                            LastFrameSequenceNumberForNak = NextAwaitedFrameSequenceNumber;
+                            LastFrameSequenceNumberForNak = NextFrameToReceive;
 
                             // Build a Nak frame
-                            Frame nakFrame = new Frame(Constants.FrameType.Nak, DecrementSequenceNumber(NextAwaitedFrameSequenceNumber));
+                            Frame nakFrame = new Frame(Constants.FrameType.Nak, DecrementSequenceNumber(NextFrameToReceive));
 
                             // Put the Nak frame in the high priority queue to send it as soon as possible
                             HighPriorityFrames.Enqueue(nakFrame);
@@ -240,20 +264,20 @@ namespace TransmissionSimulation.Components
                         if (frameReceived.Type == Constants.FrameType.Data)
                         {
                             // If the frame is not the Awaited frame, we preemptively prepare a Nak, but only if no Nak was sent already, because the Awaited frame was probably lost
-                            if (frameReceived.Id != NextAwaitedFrameSequenceNumber && NoNakSentForNextAwaitedFrame)
+                            if (frameReceived.Id != NextFrameToReceive && NoNakSentForNextAwaitedFrame)
                             {
                                 // Set the LastFrameSequenceNumberForNak to the currently awaited frame's sequence number
-                                LastFrameSequenceNumberForNak = NextAwaitedFrameSequenceNumber;
+                                LastFrameSequenceNumberForNak = NextFrameToReceive;
 
                                 // Build a NAK frame
-                                Frame nakFrame = new Frame(Constants.FrameType.Nak, DecrementSequenceNumber(NextAwaitedFrameSequenceNumber));
+                                Frame nakFrame = new Frame(Constants.FrameType.Nak, DecrementSequenceNumber(NextFrameToReceive));
 
                                 // Put the Nak frame in the high priority queue to send it as soon as possible
                                 HighPriorityFrames.Enqueue(nakFrame);
                             }
 
                             // Check if the frame id fits in the input buffer. If it does not, we ignore its data
-                            if (IsBetween(NextAwaitedFrameSequenceNumber, frameReceived.Id, LastFrameToSaveSequenceNumber))
+                            if (IsBetween(NextFrameToReceive, frameReceived.Id, LastFrameToReceive))
                             {
                                 // we can add it to the input buffer if not already there
                                 if (!inputBuffer.ContainsKey(frameReceived.Id % BufferSize))
@@ -263,7 +287,7 @@ namespace TransmissionSimulation.Components
                             }
 
                             // Try to pass data to the superior layer (in the fileStream) if we have the next ordered frames
-                            while (inputBuffer.ContainsKey(NextAwaitedFrameSequenceNumber % BufferSize))
+                            while (inputBuffer.ContainsKey(NextFrameToReceive % BufferSize))
                             {
                                 // TODO Add validation for file write
 
@@ -274,10 +298,10 @@ namespace TransmissionSimulation.Components
                                 fileStream.Flush();
 
                                 // Remove the frame from the input buffer
-                                inputBuffer.Remove(NextAwaitedFrameSequenceNumber % BufferSize);
+                                inputBuffer.Remove(NextFrameToReceive % BufferSize);
 
                                 // Increment the awaited frame sequence number because this one has been treated. This also reset the LastFrameSequenceNumberForNak value so that it is not mistaken for another Frame with the same sequence number later on.
-                                NextAwaitedFrameSequenceNumber = IncrementSequenceNumber(NextAwaitedFrameSequenceNumber);
+                                NextFrameToReceive = IncrementSequenceNumber(NextFrameToReceive);
                                 // Reset LastFrameSequenceNumberForNak to impossible value, because we changed the NextAwaitedFrameSequenceNumber
                                 LastFrameSequenceNumberForNak = MaxSequence;
 
@@ -293,7 +317,7 @@ namespace TransmissionSimulation.Components
                             // frameReceived.Ack represent the last Acknoloedged frame by the receiver, so frameReceived.Ack + 1 is the one the Nak was aiming at.
                             UInt16 nakSequenceNumber = IncrementSequenceNumber(frameReceived.Ack);
                             
-                            if (IsBetween(NextAwaitedAckSequenceNumber, nakSequenceNumber, NextFrameToSendSequenceNumber)) // valid sequence number for current window
+                            if (IsBetween(FirstFrameSent, nakSequenceNumber, NextFrameToSendSequenceNumber)) // valid sequence number for current window
                             {
                                 if (outputBuffer.ContainsKey(nakSequenceNumber % BufferSize))
                                 {
@@ -304,18 +328,18 @@ namespace TransmissionSimulation.Components
                         }
 
                         // Update the NextAwaitedAckSequenceNumber value with the Ack in the frame. 
-                        while (IsBetween(NextAwaitedAckSequenceNumber, frameReceived.Ack, NextFrameToSendSequenceNumber))
+                        while (IsBetween(FirstFrameSent, frameReceived.Ack, NextFrameToSendSequenceNumber))
                         {
                             System.Timers.Timer timeoutTimer;
                             // Remove the timeout timer associated with this frame sequence number
-                            if (TimeoutTimers.TryRemove(NextAwaitedAckSequenceNumber, out timeoutTimer))
+                            if (TimeoutTimers.TryRemove(FirstFrameSent, out timeoutTimer))
                             {
                                 timeoutTimer.Stop();
                             }
 
-                            outputBuffer.Remove(NextAwaitedAckSequenceNumber % BufferSize);
+                            outputBuffer.Remove(FirstFrameSent % BufferSize);
 
-                            NextAwaitedAckSequenceNumber = IncrementSequenceNumber(NextAwaitedAckSequenceNumber);
+                            FirstFrameSent = IncrementSequenceNumber(FirstFrameSent);
                         }
                     }
                 }
@@ -363,7 +387,7 @@ namespace TransmissionSimulation.Components
 
         private UInt16 DecrementSequenceNumber(UInt16 sequenceNumber)
         {
-            return (UInt16)(sequenceNumber - 1 > 0 ? sequenceNumber - 1 : MaxSequence - 1);
+            return (UInt16)(sequenceNumber - 1 >= 0 ? sequenceNumber - 1 : MaxSequence - 1);
         }
 
         /// <summary>
@@ -374,7 +398,7 @@ namespace TransmissionSimulation.Components
         {
             // Prepare the frame to be sent on the wire (converts to BitArray and encode for error control with Hamming)
             BitArray frameBitArray = frame.GetFrameAsByteArray();
-            BitArray encodedFrameBitArray = HammingHelper.EncryptManager(frameBitArray);
+            BitArray encodedFrameBitArray = HammingHelper.EncryptManager(frameBitArray, EncodedFramePadding);
 
             // Notify subscriber that frame is being sent
             sendFrameDelegate(frame, true);
@@ -418,7 +442,7 @@ namespace TransmissionSimulation.Components
                 }
 
                 // Decode the frame
-                BitArray frameBitArray = HammingHelper.DecryptManager(encodedFrameBitArray);
+                BitArray frameBitArray = HammingHelper.DecryptManager(encodedFrameBitArray, EncodedFramePadding);
 
                 // Converts BitArray to Frame
                 Frame frame = Frame.GetFrameFromBitArray(frameBitArray);
