@@ -370,12 +370,12 @@ namespace TransmissionSimulation.Components
         {
             // Prepare the frame to be sent on the wire (converts to BitArray and encode for error control with Hamming)
             BitArray frameBitArray = frame.GetFrameAsByteArray();
-            BitArray encodedFrameBitArray = HammingHelper.Encrypt(frameBitArray);
+            BitArray encodedFrameBitArray = HammingHelper.EncryptManager(frameBitArray);
 
             // Notify subscriber that frame is being sent
             sendFrameDelegate(frame, true);
 
-            Console.WriteLine("SendFrame : id={0}, type={1}, ack={2}, data lenght={3}", frame.Id, frame.Type.ToString(), frame.Ack, frame.Data.Count);
+            Console.WriteLine("{5, 11} {0, 12} : id={1, 2}, type={2, 4}, ack={3, 2}, data lenght={4, 3}", "SendFrame", frame.Id, frame.Type.ToString(), frame.Ack, frame.Data.Count, stationType == Constants.Station.Dest ? "Destination" : "Source");
 
             // Send the data
             transmitter.SendData(encodedFrameBitArray, stationType);
@@ -414,10 +414,7 @@ namespace TransmissionSimulation.Components
                 }
 
                 // Decode the frame
-                BitArray frameBitArray = HammingHelper.Decrypt(encodedFrameBitArray);
-                //byte[] temp = new byte[DataSizeInFrame];
-                //frameBitArray.CopyTo(temp, 0);
-                //BitArray frameBitArrayNormalized = new BitArray(temp);
+                BitArray frameBitArray = HammingHelper.DecryptManager(encodedFrameBitArray);
 
                 // Converts BitArray to Frame
                 Frame frame = Frame.GetFrameFromBitArray(frameBitArray);
@@ -425,7 +422,7 @@ namespace TransmissionSimulation.Components
                 // Notify subscriber that frame is being received
                 sendFrameDelegate(frame, false);
 
-                Console.WriteLine("Receive frame : id={0}, type={1}, ack={2}, data lenght={3}", frame.Id, frame.Type.ToString(), frame.Ack, frame.Data.Count);
+                Console.WriteLine("{5, 11} {0, 12} : id={1, 2}, type={2, 4}, ack={3, 2}, data lenght={4, 3}", "ReceiveFrame", frame.Id, frame.Type.ToString(), frame.Ack, frame.Data.Count, stationType == Constants.Station.Dest ? "Destination" : "Source");
 
                 return frame;
             }
