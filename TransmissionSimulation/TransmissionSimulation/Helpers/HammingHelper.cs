@@ -69,13 +69,6 @@ namespace TransmissionSimulation.Helpers
                 tmpBitArray.CopyTo(arrayOuput, i * tmpBitArray.Length);
             }
 
-            ////Last bits
-            //Boolean[] b = new Boolean[bitArrayInput.Length % 8];
-            //bitArrayInput.CopyTo(b, bitArrayInput.Length - bitArrayInput.Length % 8);
-            //BitArray tmpBitArray2 = new BitArray(b);
-            //tmpBitArray2 = Encrypt(tmpBitArray2);
-            //tmpBitArray2.CopyTo(arrayOuput, arrayOuput.Length - GetTotalSize(bitArrayInput.Length % 8));
-
             return new BitArray(arrayOuput);
         }
 
@@ -102,15 +95,10 @@ namespace TransmissionSimulation.Helpers
                 // index 0 is reserved to the master bit of control
                 if (IsPowerOf2(i))
                 {
-                    //Console.WriteLine("Is Power of 2 : {0}", i);
-
                     int parityCount = GetParityCount(i, bitArrayOutput);
-
-                    //Console.WriteLine("ParityCount {0}", parityCount);
 
                     // Write 1 for odd and 0 for even
                     bitArrayOutput[i] = (parityCount & 1) == 1;
-                    //Console.WriteLine("ParityBool {0}", bitArrayOutput[i]);
                 }
 
                 if (bitArrayOutput[i])
@@ -120,8 +108,7 @@ namespace TransmissionSimulation.Helpers
             // Fill the master bit of controle
             // Write 1 for odd and 0 for even
             bitArrayOutput[0] = (masterParityCount & 1) == 1;
-
-            //Console.Write(BitArrayToDigitString(bitArrayOutput));
+            
             return bitArrayOutput;
         }
 
@@ -145,11 +132,12 @@ namespace TransmissionSimulation.Helpers
                 }
             }
 
-            // TODO 
+            // TODO
             // Correct the error, if there is one ...
             if (errorSyndrome != 0)
             {
                 bitArrayInput[errorSyndrome] = !bitArrayInput[errorSyndrome];
+                throw new Exception("Error Corrected !!! :)");
             }
             
             BitArray bitArrayOutput = new BitArray(GetDataSize(bitArrayInput.Length));
@@ -237,7 +225,6 @@ namespace TransmissionSimulation.Helpers
             {
                 if (IsBitSet(j, i))
                 {
-                    //Console.WriteLine(" -> Is Bit Set : {0}", j);
                     if (bitArray[j])
                         parityCount++;
                 }
