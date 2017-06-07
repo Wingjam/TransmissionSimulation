@@ -55,7 +55,7 @@ namespace TransmissionSimulation
             receiveThread = new Thread(receiveStation.Start);
 
             sendThread.Start();
-            //receiveThread.Start();
+            receiveThread.Start();
         }
 
         private void btnInject_Click(object sender, EventArgs e)

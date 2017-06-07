@@ -78,15 +78,15 @@ namespace TransmissionSimulation.Helpers
                 // index 0 is reserved to the master bit of control
                 if (IsPowerOf2(i))
                 {
-                    Console.WriteLine("Is Power of 2 : {0}", i);
+                    //Console.WriteLine("Is Power of 2 : {0}", i);
 
                     int parityCount = GetParityCount(i, bitArrayOutput);
 
-                    Console.WriteLine("ParityCount {0}", parityCount);
+                    //Console.WriteLine("ParityCount {0}", parityCount);
 
                     // Write 1 for odd and 0 for even
                     bitArrayOutput[i] = (parityCount & 1) == 1;
-                    Console.WriteLine("ParityBool {0}", bitArrayOutput[i]);
+                    //Console.WriteLine("ParityBool {0}", bitArrayOutput[i]);
                 }
 
                 if (bitArrayOutput[i])
@@ -97,7 +97,7 @@ namespace TransmissionSimulation.Helpers
             // Write 1 for odd and 0 for even
             bitArrayOutput[0] = (masterParityCount & 1) == 1;
 
-            Console.Write(BitArrayToDigitString(bitArrayOutput));
+            //Console.Write(BitArrayToDigitString(bitArrayOutput));
             return bitArrayOutput;
         }
 
@@ -213,7 +213,7 @@ namespace TransmissionSimulation.Helpers
             {
                 if (IsBitSet(j, i))
                 {
-                    Console.WriteLine(" -> Is Bit Set : {0}", j);
+                    //Console.WriteLine(" -> Is Bit Set : {0}", j);
                     if (bitArray[j])
                         parityCount++;
                 }

@@ -115,10 +115,10 @@ namespace TransmissionSimulation.Components
             int frameSizeBeforeHamming = HammingHelper.GetDataSize(Constants.FrameSize * 8) / 8;
             int frameHeaderSize = Frame.HeaderSize();
             DataSizeInFrame = frameSizeBeforeHamming - frameHeaderSize;
-            MaxSequence = (UInt16)(bufferSize * 2 + 1);
+            MaxSequence = (UInt16)(bufferSize * 2 - 1);
 
             // Initialize fields
-            NextAwaitedAckSequenceNumber = MaxSequence;
+            NextAwaitedAckSequenceNumber = 0;
             NextFrameToSendSequenceNumber = 0;
             NextAwaitedFrameSequenceNumber = 0;
 
@@ -129,7 +129,7 @@ namespace TransmissionSimulation.Components
             // Initialise ack timer logic
             AckTimer = new System.Timers.Timer(AckTimeout);
             // When the timer ends, we need to inform the program that we need to send an Ack now. Also stop the timer.
-            AckTimer.Elapsed += (sender, e) => { sendAck = true; AckTimer.Stop(); };
+            AckTimer.Elapsed += (sender, e) => { sendAck = true; AckTimer.Stop(); Console.WriteLine("ack timer elapsed"); };
             sendAck = false;
 
             HighPriorityFrames = new Queue<Frame>();
@@ -140,6 +140,7 @@ namespace TransmissionSimulation.Components
         {
             while (true)
             {
+                Thread.Sleep(1000);
                 //events (in order of priority):
                 // - high priority frame ready (examples : nak is ready to be sent, we need to resend a frame for which a nak was received, we need to resend a frame for which the timeout occured)
                 // - ready to send on wire and frame to send available
@@ -159,16 +160,19 @@ namespace TransmissionSimulation.Components
 
                 bool transmitterReady = transmitter.TransmitterReady(stationType);
                 bool transmitterDataReceived = transmitter.DataReceived(stationType);
-                if (transmitterReady && HighPriorityFrames.Count > 0)
+                if (transmitterReady && HighPriorityFrames.Count > 0) // - high priority frame ready (examples : nak is ready to be sent, we need to resend a frame for which a nak was received, we need to resend a frame for which the timeout occured)
                 {
                     // Gets next high priority frame
                     Frame frame = HighPriorityFrames.Dequeue();
 
                     // Update frame Ack to latest Ack
-                    frame.Ack = DecrementSequenceNumber(NextAwaitedAckSequenceNumber);
+                    frame.Ack = DecrementSequenceNumber(NextAwaitedFrameSequenceNumber);
 
-                    // Send the frame
-                    SendFrame(frame);
+                    if (frame.Type != Constants.FrameType.Data || outputBuffer.ContainsKey(frame.Id % BufferSize))
+                    {
+                        // Send the frame
+                        SendFrame(frame);
+                    }
                 }
                 else if (transmitterReady && FrameReadyToSend) // - ready to send on wire and frame to send available
                 {
@@ -249,7 +253,7 @@ namespace TransmissionSimulation.Components
                             }
 
                             // Check if the frame id fits in the input buffer. If it does not, we ignore its data
-                            if (IsBetween(NextAwaitedAckSequenceNumber, frameReceived.Id, LastFrameToSaveSequenceNumber))
+                            if (IsBetween(NextAwaitedFrameSequenceNumber, frameReceived.Id, LastFrameToSaveSequenceNumber))
                             {
                                 // we can add it to the input buffer if not already there
                                 if (!inputBuffer.ContainsKey(frameReceived.Id % BufferSize))
@@ -300,7 +304,7 @@ namespace TransmissionSimulation.Components
                         }
 
                         // Update the NextAwaitedAckSequenceNumber value with the Ack in the frame. 
-                        while (IsBetween(NextAwaitedAckSequenceNumber, frameReceived.Ack, LastFrameToSaveSequenceNumber))
+                        while (IsBetween(NextAwaitedAckSequenceNumber, frameReceived.Ack, NextFrameToSendSequenceNumber))
                         {
                             System.Timers.Timer timeoutTimer;
                             // Remove the timeout timer associated with this frame sequence number
@@ -341,7 +345,7 @@ namespace TransmissionSimulation.Components
             // The convention is that a stopped timer means the timeout occured and we should resend the frame.
             System.Timers.Timer timeoutTimer = new System.Timers.Timer(TimeoutInMs);
 
-            timeoutTimer.Elapsed += (sender, e) => { timeoutTimer.Stop(); };
+            timeoutTimer.Elapsed += (sender, e) => { timeoutTimer.Stop(); Console.WriteLine("timeout : {0}", sequenceNumber); };
             timeoutTimer.Start();
 
             TimeoutTimers.TryAdd(sequenceNumber, timeoutTimer);
