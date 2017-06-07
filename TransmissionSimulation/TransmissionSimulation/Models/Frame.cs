@@ -2,6 +2,7 @@
 using System.Collections;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
 using static TransmissionSimulation.Ressources.Constants;
 
 namespace TransmissionSimulation.Models
@@ -109,8 +110,21 @@ namespace TransmissionSimulation.Models
                     value += "Data ";
                     break;
             }
-            value += "Ack:" + Ack.ToString("00");
-            value += Data.ToString();
+            value += "|" + Ack.ToString("00");
+            //value += Data.ToString();
+            StringBuilder sb = new StringBuilder(Data.Length / 4);
+
+            for (int i = 0; i < Data.Length; i += 4)
+            {
+                int v = (Data[i] ? 8 : 0) |
+                        (Data[i + 1] ? 4 : 0) |
+                        (Data[i + 2] ? 2 : 0) |
+                        (Data[i + 3] ? 1 : 0);
+
+                sb.Append(v.ToString("x1")); // Or "X1"
+            }
+
+            value += "|"+sb;
             return value;
         }
     }

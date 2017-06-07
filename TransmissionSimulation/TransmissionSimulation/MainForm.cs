@@ -81,7 +81,9 @@ namespace TransmissionSimulation
             else
             {
                 textBox.AppendText(frameToShow.ToString());
+                textBox.AppendText(Environment.NewLine);
             }
+            //TODO voir avec félix pour avoir un niveau de progression
         }
     }
 }
