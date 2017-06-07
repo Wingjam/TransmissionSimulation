@@ -1,5 +1,6 @@
 ﻿﻿﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using TransmissionSimulation.Ressources;
@@ -18,9 +19,9 @@ namespace TransmissionSimulation.Components
         private bool readyToSendDest;
         private bool dataReceivedSource;
         private uint bitInversions;
-        private ArrayList indicesInversions;
 
-        public ArrayList IndicesInversions { get => indicesInversions; set => indicesInversions = value; }
+        public List<int> IndicesInversions { get; set; }
+        
         public uint BitInversions { set => bitInversions = value; }
         public bool ReadyToSendSource
         {
@@ -77,7 +78,7 @@ namespace TransmissionSimulation.Components
             readyToSendDest = true;
             dataReceivedSource = false;
             bitInversions = 0;
-            indicesInversions = new ArrayList();
+            IndicesInversions = new List<int>();
         }
 
         /// <summary>
@@ -120,16 +121,16 @@ namespace TransmissionSimulation.Components
 		/// <param name="transferData">Data to insert errors into.</param>
 		private BitArray InjectErrors(BitArray transferData)
 		{
-            if (indicesInversions != null && indicesInversions.Count > 0)
+            if (IndicesInversions != null && IndicesInversions.Count > 0)
             {
-                foreach(var i in indicesInversions)
+                foreach(var i in IndicesInversions)
                 {
-                    if ((int)i < indicesInversions.Count)
+                    if (i < IndicesInversions.Count)
                         transferData[(int)i] = !transferData[(int)i];
                 }
             }
 
-			indicesInversions.Clear();
+			IndicesInversions.Clear();
 
 			return transferData;
 		}

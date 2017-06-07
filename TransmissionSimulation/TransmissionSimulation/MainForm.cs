@@ -64,7 +64,7 @@ namespace TransmissionSimulation
             {
                 if (errorPosition.Validate() && errorPosition.Value != -1)
                 {
-                    cable.IndicesInversions.Add(errorPosition.Value);
+                    cable.IndicesInversions.Add((int)errorPosition.Value);
                 }
             }
         }

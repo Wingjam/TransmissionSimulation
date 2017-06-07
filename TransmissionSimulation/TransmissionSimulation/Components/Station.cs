@@ -152,19 +152,13 @@ namespace TransmissionSimulation.Components
             TimeoutTimers = new ConcurrentDictionary<UInt16, System.Timers.Timer>();
         }
 
+        /// <summary>
+        /// Starts the Station
+        /// </summary>
         public void Start()
         {
             while (true)
             {
-                //Thread.Sleep(1000);
-
-
-
-
-
-
-
-
                 //events (in order of priority):
                 // - high priority frame ready (examples : nak is ready to be sent, we need to resend a frame for which a nak was received, we need to resend a frame for which the timeout occured)
                 // - ready to send on wire and frame to send available
@@ -294,7 +288,7 @@ namespace TransmissionSimulation.Components
                                 // Write to frame data to the file
                                 byte[] frameData = new byte[frameReceived.Data.Length / 8];
                                 frameReceived.Data.CopyTo(frameData, 0);
-                                fileStream.Write(frameData, 0, frameReceived.Data.Length / 8);
+                                fileStream.Write(frameData, 0, (int)frameReceived.DataSize);
                                 fileStream.Flush();
 
                                 // Remove the frame from the input buffer
@@ -364,6 +358,10 @@ namespace TransmissionSimulation.Components
             }
         }
 
+        /// <summary>
+        /// Register a timeout for the specified sequence number. The timer will signal that we never had an Ack for the sequence number provided.
+        /// </summary>
+        /// <param name="sequenceNumber"></param>
         private void RegisterTimeout(UInt16 sequenceNumber)
         {
             // The convention is that a stopped timer means the timeout occured and we should resend the frame.
@@ -375,16 +373,33 @@ namespace TransmissionSimulation.Components
             TimeoutTimers.TryAdd(sequenceNumber, timeoutTimer);
         }
 
+        /// <summary>
+        /// Check if middle is between beginning and end in a circular range
+        /// </summary>
+        /// <param name="beginning"></param>
+        /// <param name="middle"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
         private bool IsBetween(UInt16 beginning, UInt16 middle, UInt16 end)
         {
             return (beginning <= middle && middle < end) || (end < beginning && beginning <= middle) || (middle < end && end < beginning);
         }
 
+        /// <summary>
+        /// Increment a sequence number and ensure that we never go past MaxSequence - 1, we instead go back to 0.
+        /// </summary>
+        /// <param name="sequenceNumber"></param>
+        /// <returns></returns>
         private UInt16 IncrementSequenceNumber(UInt16 sequenceNumber)
         {
             return (UInt16)(sequenceNumber + 1 < MaxSequence ? sequenceNumber + 1 : 0);
         }
 
+        /// <summary>
+        /// Decrement a sequence number and ensure that we never fall below 0, we instead go back to MaxSequence - 1
+        /// </summary>
+        /// <param name="sequenceNumber"></param>
+        /// <returns></returns>
         private UInt16 DecrementSequenceNumber(UInt16 sequenceNumber)
         {
             return (UInt16)(sequenceNumber - 1 >= 0 ? sequenceNumber - 1 : MaxSequence - 1);
@@ -403,12 +418,18 @@ namespace TransmissionSimulation.Components
             // Notify subscriber that frame is being sent
             sendFrameDelegate(frame, true);
 
-            Console.WriteLine("{5, 11} {0, 12} : id={1, 2}, type={2, 4}, ack={3, 2}, data lenght={4, 3}", "SendFrame", frame.Id, frame.Type.ToString(), frame.Ack, frame.Data.Count, stationType == Constants.Station.Dest ? "Destination" : "Source");
+            Console.WriteLine("{5, 11} {0, 12} : id={1, 2}, type={2, 4}, ack={3, 2}, data lenght={4, 3}={6, 3}", "SendFrame", frame.Id, frame.Type.ToString(), frame.Ack, frame.Data.Count / 8, stationType == Constants.Station.Dest ? "Destination" : "Source", frame.DataSize);
 
             // Send the data
             transmitter.SendData(encodedFrameBitArray, stationType);
         }
 
+        /// <summary>
+        /// Builds a frame with the next data to send
+        /// </summary>
+        /// <param name="numSequence"></param>
+        /// <param name="ack"></param>
+        /// <returns></returns>
         private Frame BuildDataFrame(UInt16 numSequence, UInt16 ack)
         {
             // TODO Add validation for file read
@@ -418,7 +439,7 @@ namespace TransmissionSimulation.Components
             int actuallyReadBytesAmount = fileStream.Read(data, 0, DataSizeInFrame);
             BitArray dataBitArray = new BitArray(data);
 
-            return new Frame(numSequence, Constants.FrameType.Data, ack, dataBitArray);
+            return new Frame(numSequence, Constants.FrameType.Data, ack, dataBitArray, (UInt32)actuallyReadBytesAmount);
         }
 
         /// <summary>
@@ -450,7 +471,7 @@ namespace TransmissionSimulation.Components
                 // Notify subscriber that frame is being received
                 sendFrameDelegate(frame, false);
 
-                Console.WriteLine("{5, 11} {0, 12} : id={1, 2}, type={2, 4}, ack={3, 2}, data lenght={4, 3}", "ReceiveFrame", frame.Id, frame.Type.ToString(), frame.Ack, frame.Data.Count, stationType == Constants.Station.Dest ? "Destination" : "Source");
+                Console.WriteLine("{5, 11} {0, 12} : id={1, 2}, type={2, 4}, ack={3, 2}, data lenght={4, 3}={6, 3}", "ReceiveFrame", frame.Id, frame.Type.ToString(), frame.Ack, frame.Data.Count / 8, stationType == Constants.Station.Dest ? "Destination" : "Source", frame.DataSize);
 
                 return frame;
             }
