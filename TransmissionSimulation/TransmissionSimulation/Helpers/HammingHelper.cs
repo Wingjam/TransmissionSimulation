@@ -14,20 +14,44 @@ namespace TransmissionSimulation.Helpers
     {
         public static BitArray EncryptManager(BitArray bitArrayInput, int padding = 0)
         {
-            return HammingManager(bitArrayInput, 8, GetTotalSize, Encrypt);
+            BitArray bitArrayOutput = HammingManager(bitArrayInput, 8, GetTotalSize, Encrypt);
+            return ResizeBitArray(bitArrayOutput, bitArrayOutput.Length + padding);
         }
 
         public static BitArray DecryptManager(BitArray bitArrayInput, int padding = 0)
         {
-            return HammingManager(bitArrayInput, GetTotalSize(8), GetDataSize, Decrypt);
+            BitArray bitArrayOutput = HammingManager(bitArrayInput, GetTotalSize(8), GetDataSize, Decrypt);
+            return ResizeBitArray(bitArrayOutput, bitArrayOutput.Length + padding);
         }
 
-        private static BitArray HammingManager(BitArray bitArrayInput, int magicNumber, Func<int, int> OutputSize, Func<BitArray, BitArray> Hamming)
+        private static BitArray ResizeBitArray(BitArray bitArray, int newArraySize, int startIndex = 0)
+        {
+            Boolean[] outputBits = new Boolean[newArraySize];
+            // Same Array
+            if (bitArray.Length == newArraySize)
+                return bitArray;
+
+            // Bigger Array
+            if (bitArray.Length < newArraySize)
+                bitArray.CopyTo(outputBits, 0);
+
+            //Smaller Array
+            else
+            {
+                Boolean[] allBits = new Boolean[bitArray.Length];
+                bitArray.CopyTo(allBits, 0);
+                Array.Copy(allBits, startIndex, outputBits, 0, newArraySize);
+            }
+
+            return new BitArray(outputBits);
+        }
+
+        private static BitArray HammingManager(BitArray bitArrayInput, int magicNumber, Func<int, int> outputSize, Func<BitArray, BitArray> hamming)
         {
             if (bitArrayInput.Length % magicNumber != 0)
                 throw new ArgumentException("BitArray size must be multiple of " + magicNumber);
 
-            Boolean[] arrayOuput = new Boolean[OutputSize(bitArrayInput.Length)];
+            Boolean[] arrayOuput = new Boolean[outputSize(bitArrayInput.Length)];
 
             for (int i = 0; i < bitArrayInput.Length / magicNumber; i++)
             {
@@ -40,7 +64,7 @@ namespace TransmissionSimulation.Helpers
                 BitArray tmpBitArray = new BitArray(bits);
 
                 // Encrypt/Decrypt it
-                tmpBitArray = Hamming(tmpBitArray);
+                tmpBitArray = hamming(tmpBitArray);
                 // Add the output to the arrayOutput
                 tmpBitArray.CopyTo(arrayOuput, i * tmpBitArray.Length);
             }

@@ -62,6 +62,80 @@ namespace TransmissionSimulationTests.Helpers
         }
 
         [TestMethod]
+        public void TestResizeBitArrayBigger()
+        {
+            PrivateType hh = new PrivateType(typeof(HammingHelper));
+
+            BitArray bitArrayInput = new BitArray(10)
+            {
+                [0] = true,
+                [2] = true,
+                [8] = true,
+                [9] = true,
+            };
+
+            BitArray bitArrayExpected = new BitArray(18)
+            {
+                [0] = true,
+                [2] = true,
+                [8] = true,
+                [9] = true,
+            };
+            object[] args = new object[3] { bitArrayInput, 18, 0 };
+            var bitArrayOutput = (BitArray)hh.InvokeStatic("ResizeBitArray", args);
+
+            Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArrayExpected), HammingHelper.BitArrayToDigitString(bitArrayOutput));
+        }
+
+        [TestMethod]
+        public void TestResizeBitArraySmaller()
+        {
+            PrivateType hh = new PrivateType(typeof(HammingHelper));
+
+            BitArray bitArrayInput = new BitArray(10)
+            {
+                [0] = true,
+                [2] = true,
+                [8] = true,
+                [9] = true,
+            };
+
+            BitArray bitArrayExpected = new BitArray(4)
+            {
+                [0] = true,
+                [2] = true,
+            };
+            object[] args = { bitArrayInput, 4, 0 };
+            var bitArrayOutput = (BitArray)hh.InvokeStatic("ResizeBitArray", args);
+
+            Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArrayExpected), HammingHelper.BitArrayToDigitString(bitArrayOutput));
+        }
+
+        [TestMethod]
+        public void TestResizeBitArraySmallerWithIndex()
+        {
+            PrivateType hh = new PrivateType(typeof(HammingHelper));
+
+            BitArray bitArrayInput = new BitArray(10)
+            {
+                [0] = true,
+                [2] = true,
+                [8] = true,
+                [9] = true,
+            };
+
+            BitArray bitArrayExpected = new BitArray(4)
+            {
+                [2] = true,
+                [3] = true,
+            };
+            object[] args = { bitArrayInput, 4, 6 };
+            var bitArrayOutput = (BitArray)hh.InvokeStatic("ResizeBitArray", args);
+
+            Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArrayExpected), HammingHelper.BitArrayToDigitString(bitArrayOutput));
+        }
+
+        [TestMethod]
         public void TestIsPowerOf2()
         {
             Assert.AreEqual(true, HammingHelper.IsPowerOf2(0));
