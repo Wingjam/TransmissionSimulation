@@ -4,7 +4,7 @@ using TransmissionSimulation.Components;
 using TransmissionSimulation.Ressources;
 using System.Threading;
 
-namespace TransmissionSimulationTests.Helpers
+namespace TransmissionSimulationTests.Components
 {
     [TestClass]
     public class TransmitterTests

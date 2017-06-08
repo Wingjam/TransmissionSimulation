@@ -48,7 +48,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Helpers\TransmitterTests.cs" />
+    <Compile Include="Components\TransmitterTests.cs" />
     <Compile Include="Helpers\HammingHelperTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
