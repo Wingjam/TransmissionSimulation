@@ -5,7 +5,7 @@ namespace TransmissionSimulation.Ressources
 {
     public static class Constants
     {
-        public enum Station { Source, Dest }
+        public enum Station { Station1, Station2 }
 
         public enum FrameType { Data, Ack, Nak }
 

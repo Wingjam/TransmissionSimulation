@@ -22,30 +22,30 @@ namespace TransmissionSimulationTests.Helpers
         [TestMethod]
         public void When_data_is_sent_then_it_is_received()
         {
-            Assert.IsFalse(t.DataReceivedDest);
-            Assert.IsTrue(t.TransmitterReady(Constants.Station.Source));
-            t.SendData(data, Constants.Station.Source);
+            Assert.IsFalse(t.DataReceivedStation2);
+            Assert.IsTrue(t.TransmitterReady(Constants.Station.Station1));
+            t.SendData(data, Constants.Station.Station1);
             Thread.Sleep(Constants.DefaultDelay * 200);
-            Assert.IsTrue(t.DataReceivedDest);
+            Assert.IsTrue(t.DataReceivedStation2);
         }
 
         [TestMethod]
         public void When_data_is_sent_but_not_obtained_then_transmitter_is_not_ready()
         {
-            Assert.IsTrue(t.TransmitterReady(Constants.Station.Source));
-            t.SendData(data, Constants.Station.Source);
+            Assert.IsTrue(t.TransmitterReady(Constants.Station.Station1));
+            t.SendData(data, Constants.Station.Station1);
             Thread.Sleep(Constants.DefaultDelay * 200);
-            Assert.IsFalse(t.TransmitterReady(Constants.Station.Source));
+            Assert.IsFalse(t.TransmitterReady(Constants.Station.Station1));
         }
 
         [TestMethod]
         public void When_data_is_sent_and_obtained_then_transmitter_is_ready()
         {
-            Assert.IsTrue(t.TransmitterReady(Constants.Station.Source));
-            t.SendData(data, Constants.Station.Source);
+            Assert.IsTrue(t.TransmitterReady(Constants.Station.Station1));
+            t.SendData(data, Constants.Station.Station1);
             Thread.Sleep(Constants.DefaultDelay * 200);
-            var dataDest = t.GetData(Constants.Station.Dest);
-            Assert.IsTrue(t.TransmitterReady(Constants.Station.Source));
+            var dataStation2 = t.GetData(Constants.Station.Station2);
+            Assert.IsTrue(t.TransmitterReady(Constants.Station.Station1));
         }
     }
 }

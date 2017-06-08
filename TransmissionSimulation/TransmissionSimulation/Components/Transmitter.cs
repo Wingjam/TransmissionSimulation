@@ -10,55 +10,55 @@ namespace TransmissionSimulation.Components
     public class Transmitter : ITransmitter
     {
         private static Mutex mutex = new Mutex();
-        private BitArray sendingSource;
-        private BitArray sendingDest;
-        private BitArray receivingDest;
-        private BitArray receivingSource;
-        private bool readyToSendSource;
-        private bool dataReceivedDest;
-        private bool readyToSendDest;
-        private bool dataReceivedSource;
+        private BitArray sendingStation1;
+        private BitArray sendingStation2;
+        private BitArray receivingStation2;
+        private BitArray receivingStation1;
+        private bool readyToSendStation1;
+        private bool dataReceivedStation2;
+        private bool readyToSendStation2;
+        private bool dataReceivedStation1;
         private uint bitInversions;
 
         public List<int> IndicesInversions { get; set; }
         
         public uint BitInversions { set => bitInversions = value; }
-        public bool ReadyToSendSource
+        public bool ReadyToSendStation1
         {
-            get => readyToSendSource;
+            get => readyToSendStation1;
             set
             {
-                readyToSendSource = value;
+                readyToSendStation1 = value;
                 Task.Run(() => TransferFrame());
                 //TransferFrame();
             }
         }
-        public bool DataReceivedDest
+        public bool DataReceivedStation2
         {
-            get => dataReceivedDest;
+            get => dataReceivedStation2;
             set
             {
-                dataReceivedDest = value;
+                dataReceivedStation2 = value;
 				Task.Run(() => TransferFrame());
 				//TransferFrame();
             }
         }
-        public bool ReadyToSendDest
+        public bool ReadyToSendStation2
         {
-            get => readyToSendDest;
+            get => readyToSendStation2;
             set
             {
-                readyToSendDest = value;
+                readyToSendStation2 = value;
 				Task.Run(() => TransferFrame());
 				//TransferFrame();
             }
         }
-        public bool DataReceivedSource
+        public bool DataReceivedStation1
         {
-            get => dataReceivedSource;
+            get => dataReceivedStation1;
             set
             {
-                dataReceivedSource = value;
+                dataReceivedStation1 = value;
 				Task.Run(() => TransferFrame());
 				//TransferFrame();
             }
@@ -69,14 +69,14 @@ namespace TransmissionSimulation.Components
         /// </summary>
         public Transmitter()
         {
-            sendingSource = null;
-            sendingDest = null;
-            receivingSource = null;
-            receivingDest = null;
-            readyToSendSource = true;
-            dataReceivedDest = false;
-            readyToSendDest = true;
-            dataReceivedSource = false;
+            sendingStation1 = null;
+            sendingStation2 = null;
+            receivingStation1 = null;
+            receivingStation2 = null;
+            readyToSendStation1 = true;
+            dataReceivedStation2 = false;
+            readyToSendStation2 = true;
+            dataReceivedStation1 = false;
             bitInversions = 0;
             IndicesInversions = new List<int>();
         }
@@ -88,27 +88,27 @@ namespace TransmissionSimulation.Components
         {
             mutex.WaitOne();
 
-            //Source to Destination
-            if (!readyToSendSource && !dataReceivedDest)
+            //Station1 to Station2
+            if (!readyToSendStation1 && !dataReceivedStation2)
             {
-                BitArray transferData = sendingSource;
-                sendingSource = null;
+                BitArray transferData = sendingStation1;
+                sendingStation1 = null;
                 Thread.Sleep(Constants.DefaultDelay * 100); //deciseconds to milliseconds
                 transferData = InjectErrors(transferData);
-                receivingDest = transferData;
-                readyToSendSource = true;
-                dataReceivedDest = true;
+                receivingStation2 = transferData;
+                readyToSendStation1 = true;
+                dataReceivedStation2 = true;
             }
-            //Destination to Source
-            else if (!readyToSendDest && !dataReceivedSource)
+            //Station2 to Station1
+            else if (!readyToSendStation2 && !dataReceivedStation1)
             {
-                BitArray transferData = sendingDest;
-                sendingDest = null;
+                BitArray transferData = sendingStation2;
+                sendingStation2 = null;
                 Thread.Sleep(Constants.DefaultDelay * 100);
                 transferData = InjectErrors(transferData);
-                receivingSource = transferData;
-                readyToSendDest = true;
-                dataReceivedSource = true;
+                receivingStation1 = transferData;
+                readyToSendStation2 = true;
+                dataReceivedStation1 = true;
             }
 
             mutex.ReleaseMutex();
@@ -160,7 +160,7 @@ namespace TransmissionSimulation.Components
         /// <param name="station">Station to check for transmitter ready.</param>
         public bool TransmitterReady(Constants.Station station)
         {
-            return (station == Constants.Station.Source) ? ReadyToSendSource && !DataReceivedDest : ReadyToSendDest && !DataReceivedSource;
+            return (station == Constants.Station.Station1) ? ReadyToSendStation1 && !DataReceivedStation2 : ReadyToSendStation2 && !DataReceivedStation1;
         }
 
         /// <summary>
@@ -170,7 +170,7 @@ namespace TransmissionSimulation.Components
         /// <param name="station">Station that checks for data received.</param>
         public bool DataReceived(Constants.Station station)
         {
-            return (station == Constants.Station.Source) ? DataReceivedSource : DataReceivedDest;
+            return (station == Constants.Station.Station1) ? DataReceivedStation1 : DataReceivedStation2;
         }
 
         /// <summary>
@@ -183,15 +183,15 @@ namespace TransmissionSimulation.Components
             mutex.WaitOne();
 
 
-            if (station == Constants.Station.Source && !DataReceivedDest)
+            if (station == Constants.Station.Station1 && !DataReceivedStation2)
             {
-                sendingSource = data;
-                ReadyToSendSource = false;
+                sendingStation1 = data;
+                ReadyToSendStation1 = false;
             }
-            else if (station == Constants.Station.Dest && !DataReceivedSource)
+            else if (station == Constants.Station.Station2 && !DataReceivedStation1)
             {
-                sendingDest = data;
-                ReadyToSendDest = false;
+                sendingStation2 = data;
+                ReadyToSendStation2 = false;
             }
             else
             {
@@ -214,15 +214,15 @@ namespace TransmissionSimulation.Components
 
             if (DataReceived(station))
             {
-                if (station == Constants.Station.Source)
+                if (station == Constants.Station.Station1)
                 {
-                    data = receivingSource;
-					DataReceivedSource = false;
+                    data = receivingStation1;
+					DataReceivedStation1 = false;
                 }
                 else
                 {
-                    data = receivingDest;
-					DataReceivedDest = false;
+                    data = receivingStation2;
+					DataReceivedStation2 = false;
                 }
             }
             else

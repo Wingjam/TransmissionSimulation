@@ -49,8 +49,8 @@ namespace TransmissionSimulation
             FileStream destinationFile = File.Open(progOption.DestinationFile, FileMode.OpenOrCreate, FileAccess.Write);
             //Start the threads
             cable = new Transmitter();
-            Station sendStation = new Station(Constants.Station.Source, cable, progOption.BufferSize, progOption.Timeout * 1000, fileToCopie, ShowFrame);
-            Station receiveStation = new Station(Constants.Station.Dest, cable, progOption.BufferSize, progOption.Timeout * 1000, destinationFile, ShowFrame);
+            Station sendStation = new Station(Constants.Station.Station1, cable, progOption.BufferSize, progOption.Timeout * 1000, fileToCopie, ShowFrame);
+            Station receiveStation = new Station(Constants.Station.Station2, cable, progOption.BufferSize, progOption.Timeout * 1000, destinationFile, ShowFrame);
             sendThread = new Thread(sendStation.Start);
             receiveThread = new Thread(receiveStation.Start);
 

@@ -59,7 +59,7 @@ namespace TransmissionSimulation.Components
         UInt16 NextFrameToSendSequenceNumber { get; set; }
         bool FrameReadyToSend {
             get {
-                if (stationType != Constants.Station.Source)
+                if (stationType != Constants.Station.Station1)
                 {
                     return false;
                 }
@@ -414,7 +414,7 @@ namespace TransmissionSimulation.Components
             // Notify subscriber that frame is being sent
             sendFrameDelegate(frame, true);
 
-            Console.WriteLine("{5, 11} {0, 12} : id={1, 2}, type={2, 4}, ack={3, 2}, data lenght={4, 3}={6, 3}", "SendFrame", frame.Id, frame.Type.ToString(), frame.Ack, frame.Data.Count / 8, stationType == Constants.Station.Dest ? "Destination" : "Source", frame.DataSize);
+            Console.WriteLine("{5, 11} {0, 12} : id={1, 2}, type={2, 4}, ack={3, 2}, data lenght={4, 3}={6, 3}", "SendFrame", frame.Id, frame.Type.ToString(), frame.Ack, frame.Data.Count / 8, stationType == Constants.Station.Station2 ? "Destination" : "Station1", frame.DataSize);
 
             // Send the data
             transmitter.SendData(encodedFrameBitArray, stationType);
@@ -467,7 +467,7 @@ namespace TransmissionSimulation.Components
                 // Notify subscriber that frame is being received
                 sendFrameDelegate(frame, false);
 
-                Console.WriteLine("{5, 11} {0, 12} : id={1, 2}, type={2, 4}, ack={3, 2}, data lenght={4, 3}={6, 3}", "ReceiveFrame", frame.Id, frame.Type.ToString(), frame.Ack, frame.Data.Count / 8, stationType == Constants.Station.Dest ? "Destination" : "Source", frame.DataSize);
+                Console.WriteLine("{5, 11} {0, 12} : id={1, 2}, type={2, 4}, ack={3, 2}, data lenght={4, 3}={6, 3}", "ReceiveFrame", frame.Id, frame.Type.ToString(), frame.Ack, frame.Data.Count / 8, stationType == Constants.Station.Station2 ? "Destination" : "Station1", frame.DataSize);
 
                 return frame;
             }
