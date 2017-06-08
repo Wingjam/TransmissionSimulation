@@ -24,10 +24,11 @@ namespace TransmissionSimulationTests.Helpers
         [TestMethod]
         public void When_data_is_sent_then_it_is_received()
         {
-            bool before = t.DataReceivedDest;
+            Assert.IsFalse(t.DataReceivedDest);
             Assert.IsTrue(t.TransmitterReady(Constants.Station.Source));
             t.SendData(data, Constants.Station.Source);
-            Assert.AreNotEqual(before, t.DataReceivedDest);
+            Thread.Sleep(Constants.DefaultDelay * 200);
+            Assert.IsTrue(t.DataReceivedDest);
         }
 
         [TestMethod]
@@ -35,6 +36,7 @@ namespace TransmissionSimulationTests.Helpers
         {
             Assert.IsTrue(t.TransmitterReady(Constants.Station.Source));
             t.SendData(data, Constants.Station.Source);
+            Thread.Sleep(Constants.DefaultDelay * 200);
             Assert.IsFalse(t.TransmitterReady(Constants.Station.Source));
         }
 
@@ -43,6 +45,7 @@ namespace TransmissionSimulationTests.Helpers
         {
             Assert.IsTrue(t.TransmitterReady(Constants.Station.Source));
             t.SendData(data, Constants.Station.Source);
+            Thread.Sleep(Constants.DefaultDelay * 200);
             var dataDest = t.GetData(Constants.Station.Dest);
             Assert.IsTrue(t.TransmitterReady(Constants.Station.Source));
         }

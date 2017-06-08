@@ -29,8 +29,8 @@ namespace TransmissionSimulation.Components
             set
             {
                 readyToSendSource = value;
-                //Task.Run(() => TransferFrame());
-                TransferFrame();
+                Task.Run(() => TransferFrame());
+                //TransferFrame();
             }
         }
         public bool DataReceivedDest
@@ -39,8 +39,8 @@ namespace TransmissionSimulation.Components
             set
             {
                 dataReceivedDest = value;
-				//Task.Run(() => TransferFrame());
-				TransferFrame();
+				Task.Run(() => TransferFrame());
+				//TransferFrame();
             }
         }
         public bool ReadyToSendDest
@@ -49,8 +49,8 @@ namespace TransmissionSimulation.Components
             set
             {
                 readyToSendDest = value;
-				//Task.Run(() => TransferFrame());
-				TransferFrame();
+				Task.Run(() => TransferFrame());
+				//TransferFrame();
             }
         }
         public bool DataReceivedSource
@@ -59,8 +59,8 @@ namespace TransmissionSimulation.Components
             set
             {
                 dataReceivedSource = value;
-				//Task.Run(() => TransferFrame());
-				TransferFrame();
+				Task.Run(() => TransferFrame());
+				//TransferFrame();
             }
         }
 
