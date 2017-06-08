@@ -4,13 +4,13 @@
  ) _) (  O )) \/ (  )(   ) __/ ) _)        )  ( /    \ ) __/ ) __//    \
 (____) \__\)\____/ (__) (__)  (____)      (__\_)\_/\_/(__)  (__)  \_/\_/
 
-IFT585 - Télématique
-Travail pratique #1 - Équipe Kappa
+IFT585 - TÃ©lÃ©matique
+Travail pratique #1 - Ã‰quipe Kappa
 
-Membres de l'équipe:
-Raphaël Cayouette - 15 064 430
+Membres de l'Ã©quipe:
+RaphaÃ«l Cayouette - 15 064 430
 Jean-Philippe Croteau - 15 072 957
 Jonathan Martineau - 15 059 124
-Félix Vigneault - 15 079 576
+FÃ©lix Vigneault - 15 079 576
 
-Travail réalisé sous Microsoft Visual Studio 2017
+Travail rÃ©alisÃ© sous Microsoft Visual Studio 2017
