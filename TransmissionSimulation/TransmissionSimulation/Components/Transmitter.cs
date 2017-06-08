@@ -208,12 +208,12 @@ namespace TransmissionSimulation.Components
 
             if (station == Constants.StationId.Station1 && !DataReceivedStation2)
             {
-                sendingStation1 = data;
+                sendingStation1 = new BitArray(data);
                 ReadyToSendStation1 = false;
             }
             else if (station == Constants.StationId.Station2 && !DataReceivedStation1)
             {
-                sendingStation2 = data;
+                sendingStation2 = new BitArray(data);
                 ReadyToSendStation2 = false;
             }
             else

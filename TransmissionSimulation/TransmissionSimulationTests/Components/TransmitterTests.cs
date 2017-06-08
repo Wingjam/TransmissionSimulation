@@ -56,7 +56,7 @@ namespace TransmissionSimulationTests.Components
             t.SendData(data, Constants.StationId.Station1);
             Thread.Sleep(Constants.DefaultDelay * 200);
             var dataStation2 = t.GetData(Constants.StationId.Station2);
-            Assert.IsTrue(data == dataStation2);
+            Assert.IsTrue(data != dataStation2);
             Assert.IsTrue(dataStation2[1] || dataStation2[2]);
         }
 
@@ -69,7 +69,31 @@ namespace TransmissionSimulationTests.Components
             t.SendData(data, Constants.StationId.Station1);
             Thread.Sleep(Constants.DefaultDelay * 200);
             var dataStation2 = t.GetData(Constants.StationId.Station2);
-            Assert.IsTrue(data == dataStation2);
+            Assert.IsTrue(data != dataStation2);
+            Assert.IsTrue(dataStation2[1] && dataStation2[2]);
+        }
+
+        [TestMethod]
+        public void When_both_types_of_errors_Then_random_errors_are_injected_first()
+        {
+            t.IndicesInversions.Add(1);
+            t.IndicesInversions.Add(2);
+            t.InsertRandomErrors(1, 1, 3);
+
+            //Supposedly random errors
+            Assert.IsTrue(t.TransmitterReady(Constants.StationId.Station1));
+            t.SendData(data, Constants.StationId.Station1);
+            Thread.Sleep(Constants.DefaultDelay * 200);
+            var dataStation2 = t.GetData(Constants.StationId.Station2);
+            Assert.IsTrue(data != dataStation2);
+            Assert.IsFalse(dataStation2[1] && dataStation2[2]);
+
+            //Supposedly fixed errors
+            Assert.IsTrue(t.TransmitterReady(Constants.StationId.Station1));
+            t.SendData(data, Constants.StationId.Station1);
+            Thread.Sleep(Constants.DefaultDelay * 200);
+            dataStation2 = t.GetData(Constants.StationId.Station2);
+            Assert.IsTrue(data != dataStation2);
             Assert.IsTrue(dataStation2[1] && dataStation2[2]);
         }
     }
