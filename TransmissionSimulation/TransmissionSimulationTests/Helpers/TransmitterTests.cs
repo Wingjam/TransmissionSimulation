@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using TransmissionSimulation.Helpers;
 using TransmissionSimulation.Components;
 using TransmissionSimulation.Ressources;
 using System.Threading;
