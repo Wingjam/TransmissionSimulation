@@ -103,7 +103,6 @@ namespace TransmissionSimulation.Components
         /// </summary>
         int AckTimeout {
             get {
-                // TODO Check if this ratio is valid 
                 return TimeoutInMs / 2;
             } }
 
@@ -282,7 +281,6 @@ namespace TransmissionSimulation.Components
                 }
                 else if (transmitterReady && FrameReadyToSend) // - ready to send on wire and frame to send available
                 {
-                    // TODO check this, we need to send the right Ack, especially when there is no Ack at all!!! The sender must not send something invalid
                     UInt16 ack = DecrementSequenceNumber(NextFrameToReceive);
                     Frame nextFrame = BuildDataFrame(NextFrameToSendSequenceNumber, ack);
 
@@ -306,15 +304,9 @@ namespace TransmissionSimulation.Components
                 }
                 else if (transmitterReady && sendAck) // - ack timer (receiver : we weren't able to send the ack with a data frame, we need to send it now!)
                 {
-                    // TODO (later) Use HighPriorityQueue instead of doing it here with a boolean (sendAck). This could unify logic, but watch out for concurrency!!
-
                     // Build an Ack frame
                     Frame ackFrame = new Frame(Constants.FrameType.Ack, DecrementSequenceNumber(NextFrameToReceive));
-
-                    // TODO Check to make sure we do not need to Stop the timer.
-                    // Early reflexion : should not do it -> if we are here it's because the timer ticked and flipped the SendAck to true, so it stopped itself. Logically, we shouldn't start it again if the SendAck is true, so we know it's off.
-                    // AckTimer.Stop();
-
+                    
                     // Inform the program that we did send the Ack
                     sendAck = false;
 
@@ -387,8 +379,6 @@ namespace TransmissionSimulation.Components
                             // Try to pass data to the superior layer (in the fileStream) if we have the next ordered frames
                             while (InputBuffer.ContainsKey(NextFrameToReceive % BufferSize))
                             {
-                                // TODO Add validation for file write
-
                                 // Write to frame data to the file
                                 byte[] frameData = new byte[frameReceived.Data.Length / 8];
                                 frameReceived.Data.CopyTo(frameData, 0);
@@ -545,8 +535,6 @@ namespace TransmissionSimulation.Components
         /// <returns></returns>
         private Frame BuildDataFrame(UInt16 numSequence, UInt16 ack)
         {
-            // TODO Add validation for file read
-
             // Fill data with next file chunk
             byte[] data = new byte[DataSizeInFrame];
             int actuallyReadBytesAmount = inputFileStream.Read(data, 0, DataSizeInFrame);
