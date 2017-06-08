@@ -120,71 +120,74 @@ namespace TransmissionSimulation
             }
             else
             {
-                lock (textBox)
+                OnAppend(((Int16)frameToShow.Id).ToString("000") + " | ", textBox, DefaultForeColor);
+                switch (frameToShow.Type)
                 {
-                    OnAppend(((Int16)frameToShow.Id).ToString("000") + " | ", textBox, DefaultForeColor);
-                    switch (frameToShow.Type)
-                    {
-                        case Constants.FrameType.Ack:
-                            OnAppend("Ack ", textBox, Color.Green);
-                            break;
-                        case Constants.FrameType.Nak:
-                            OnAppend("Nak ", textBox, Color.DarkRed);
-                            break;
-                        case Constants.FrameType.Data:
-                            OnAppend("Data", textBox, DefaultForeColor);
-                            break;
-                    }
-                    OnAppend(" | " + ((Int16)frameToShow.Ack).ToString("00"), textBox, DefaultForeColor);
-                    OnAppend(" | " + frameToShow.DataSize.ToString("000"), textBox, DefaultForeColor);
-                    OnAppend("        ", textBox, DefaultForeColor);
-                    string errorMessage = "|";
-                    Color errorColor = DefaultForeColor;
-                    switch (frameEvent)
-                    {
-                        case Constants.FrameEvent.FrameReceivedCorrupted:
-                            errorMessage += "Détecté";
-                            errorColor = Color.DarkOrange;
-                            break;
-                        case Constants.FrameEvent.FrameReceivedNotAwaited:
-                            break;
-                        case Constants.FrameEvent.FrameReceivedDuplicate:
-                            break;
-                        case Constants.FrameEvent.FrameReceivedOk:
-                            break;
-                        case Constants.FrameEvent.FrameReceivedCorrected:
-                            errorMessage += "Corrigé";
-                            errorColor = Color.DarkGreen;
-                            break;
-                        case Constants.FrameEvent.FrameSent:
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(frameEvent), frameEvent, null);
-                    }
-                    OnAppend(errorMessage, textBox, errorColor);
-
-                    OnAppend(Environment.NewLine, textBox, DefaultForeColor);
-                    //Updating the progress bar.
-                    if (stationId == Constants.StationId.Station2 && (frameEvent == Constants.FrameEvent.FrameReceivedOk ||
-                                                                      frameEvent == Constants.FrameEvent.FrameReceivedCorrected))
-                    {
-                        transfertBar.Value += (int)frameToShow.DataSize;
-                        if (transfertBar.Value == transfertBar.Maximum)
-                        {
-                            MessageBox.Show(this, "Tranfert complété!");
-                        }
-                    }
-
+                    case Constants.FrameType.Ack:
+                        OnAppend("Ack ", textBox, Color.Green);
+                        break;
+                    case Constants.FrameType.Nak:
+                        OnAppend("Nak ", textBox, Color.DarkRed);
+                        break;
+                    case Constants.FrameType.Data:
+                        OnAppend("Data", textBox, DefaultForeColor);
+                        break;
                 }
+                OnAppend(" | " + ((Int16)frameToShow.Ack).ToString("00"), textBox, DefaultForeColor);
+                OnAppend(" | " + frameToShow.DataSize.ToString("000"), textBox, DefaultForeColor);
+                OnAppend("        ", textBox, DefaultForeColor);
+                string errorMessage = "|";
+                Color errorColor = DefaultForeColor;
+                switch (frameEvent)
+                {
+                    case Constants.FrameEvent.FrameReceivedCorrupted:
+                        errorMessage += "Détecté";
+                        errorColor = Color.DarkOrange;
+                        break;
+                    case Constants.FrameEvent.FrameReceivedNotAwaited:
+                        break;
+                    case Constants.FrameEvent.FrameReceivedDuplicate:
+                        break;
+                    case Constants.FrameEvent.FrameReceivedOk:
+                        break;
+                    case Constants.FrameEvent.FrameReceivedCorrected:
+                        errorMessage += "Corrigé";
+                        errorColor = Color.DarkGreen;
+                        break;
+                    case Constants.FrameEvent.FrameSent:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(frameEvent), frameEvent, null);
+                }
+                OnAppend(errorMessage, textBox, errorColor);
+
+                OnAppend(Environment.NewLine, textBox, DefaultForeColor);
+                //Updating the progress bar.
+                if (stationId == Constants.StationId.Station2 && (frameEvent == Constants.FrameEvent.FrameReceivedOk ||
+                                                                  frameEvent == Constants.FrameEvent.FrameReceivedCorrected))
+                {
+                    int newTotal = transfertBar.Value + (int) frameToShow.DataSize;
+                    transfertBar.Value = Math.Min(newTotal, transfertBar.Maximum);
+                    if (transfertBar.Value == transfertBar.Maximum)
+                    {
+                        MessageBox.Show(this, "Tranfert complété!");
+                    }
+                }
+
+
             }
         }
 
         void OnAppend(string text, RichTextBox textBox, Color textColor)
         {
-            textBox.SelectionColor = textColor;
-            textBox.AppendText(text);
-            textBox.SelectionColor = textBox.ForeColor;
-            textBox.ScrollToCaret();
+
+            lock (textBox)
+            {
+                textBox.SelectionColor = textColor;
+                textBox.AppendText(text);
+                textBox.SelectionColor = textBox.ForeColor;
+                textBox.ScrollToCaret();
+            }
         }
 
         private void btnInjectTypeError_Click(object sender, EventArgs e)
