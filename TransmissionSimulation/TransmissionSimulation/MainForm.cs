@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.IO;
@@ -17,16 +18,18 @@ namespace TransmissionSimulation
 {
     public partial class MainForm : Form
     {
-        private readonly ProgramOption progOption;
+        private StationParameters station1Parameters;
+        private StationParameters station2Parameters;
         private Thread sendThread;
         private Thread receiveThread;
         private Transmitter cable;
         private NumericUpDown[] errorsPositions;
         delegate void UpdateDataDelegate(Frame frameToShow, bool isSent);
 
-        public MainForm(ProgramOption progOption)
+        public MainForm(StationParameters station1Parameters, StationParameters station2Parameters)
         {
-            this.progOption = progOption;
+            this.station1Parameters = station1Parameters;
+            this.station2Parameters = station2Parameters;
             InitializeComponent();
         }
 
@@ -48,16 +51,28 @@ namespace TransmissionSimulation
             numErrorDetectable.Maximum = Constants.FrameSize * 8 / 13;
             numIrrecoverable.Maximum = Constants.FrameSize * 8 / 13;
 
-            FileStream fileToCopie = File.Open(progOption.FileToCopie, FileMode.Open, FileAccess.Read);
-            FileStream destinationFile = File.Open(progOption.DestinationFile, FileMode.OpenOrCreate, FileAccess.Write);
-            destinationFile.SetLength(0);
-            destinationFile.Flush();
+            // Open source files in read mode
+            FileStream sourceFile1 = File.Open(station1Parameters.SourceFilePath, FileMode.Open, FileAccess.Read);
+            FileStream sourceFile2 = File.Open(station2Parameters.SourceFilePath, FileMode.Open, FileAccess.Read);
+
+            // Open destination file in write mode
+            FileStream destinationFile1 = File.Open(station1Parameters.DestinationFilePath, FileMode.OpenOrCreate, FileAccess.Write);
+            FileStream destinationFile2 = File.Open(station2Parameters.DestinationFilePath, FileMode.OpenOrCreate, FileAccess.Write);
+
+            // Reset destination file content
+            destinationFile1.SetLength(0);
+            destinationFile1.Flush();
+            destinationFile2.SetLength(0);
+            destinationFile2.Flush();
+
             //Start the threads
             cable = new Transmitter();
-            Station sendStation = new Station(Constants.Station.Station1, cable, progOption.BufferSize, progOption.Timeout * 1000, fileToCopie, ShowFrame);
-            Station receiveStation = new Station(Constants.Station.Station2, cable, progOption.BufferSize, progOption.Timeout * 1000, destinationFile, ShowFrame);
-            sendThread = new Thread(sendStation.Start);
-            receiveThread = new Thread(receiveStation.Start);
+
+            Station station1 = new Station(Constants.Station.Station1, cable, station1Parameters.BufferSize, station1Parameters.Timeout, sourceFile1, destinationFile1, ShowFrame);
+            Station station2 = new Station(Constants.Station.Station2, cable, station2Parameters.BufferSize, station2Parameters.Timeout, sourceFile2, destinationFile2, ShowFrame);
+
+            sendThread = new Thread(station1.Start);
+            receiveThread = new Thread(station2.Start);
 
             txtDataSend.Font = new Font("Lucida Console", 12, FontStyle.Regular);
             txtReception.Font = new Font("Lucida Console", 12, FontStyle.Regular);

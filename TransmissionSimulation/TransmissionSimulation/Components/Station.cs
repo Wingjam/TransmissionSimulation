@@ -109,11 +109,6 @@ namespace TransmissionSimulation.Components
         /// </summary>
         bool FrameReadyToSend {
             get {
-                if (StationIdenfication != Constants.Station.Station1)
-                {
-                    return false;
-                }
-
                 // Check if there is still frames to send or if the file is completly sent.
                 bool fileNotEntirelySent = inputFileStream.Position < inputFileStream.Length;
 
@@ -172,7 +167,8 @@ namespace TransmissionSimulation.Components
             ITransmitter transmitter,
             int bufferSize,
             int timeoutInMs,
-            FileStream fileStream,
+            FileStream inputFileStream,
+            FileStream outputFileStream,
             Constants.ShowFrameDelegate sendFrame)
         {
             this.StationIdenfication = stationType;
@@ -181,7 +177,8 @@ namespace TransmissionSimulation.Components
             InputBuffer = new Dictionary<int, Frame>();
             OutputBuffer = new Dictionary<int, Frame>();
             this.TimeoutInMs = timeoutInMs;
-            this.inputFileStream = fileStream;
+            this.inputFileStream = inputFileStream;
+            this.outputFileStream = outputFileStream;
             this.sendFrameDelegate = sendFrame;
 
             // Initialize constants
@@ -351,8 +348,8 @@ namespace TransmissionSimulation.Components
                                 // Write to frame data to the file
                                 byte[] frameData = new byte[frameReceived.Data.Length / 8];
                                 frameReceived.Data.CopyTo(frameData, 0);
-                                inputFileStream.Write(frameData, 0, (int)frameReceived.DataSize);
-                                inputFileStream.Flush();
+                                outputFileStream.Write(frameData, 0, (int)frameReceived.DataSize);
+                                outputFileStream.Flush();
 
                                 // Remove the frame from the input buffer
                                 InputBuffer.Remove(NextFrameToReceive % BufferSize);
