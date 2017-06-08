@@ -18,6 +18,8 @@ namespace TransmissionSimulation
 {
     public partial class MainForm : Form
     {
+        private bool envoie;
+        private bool envoie2;
         private StationParameters station1Parameters;
         private StationParameters station2Parameters;
         private Station station1;
@@ -32,6 +34,8 @@ namespace TransmissionSimulation
         {
             this.station1Parameters = station1Parameters;
             this.station2Parameters = station2Parameters;
+            envoie = true;
+            envoie2 = true;
             InitializeComponent();
         }
 
@@ -88,12 +92,17 @@ namespace TransmissionSimulation
 
         private void btnInject_Click(object sender, EventArgs e)
         {
-            foreach (NumericUpDown errorPosition in errorsPositions)
+            if (envoie)
             {
-                if (errorPosition.Validate() && errorPosition.Value != -1)
+                foreach (NumericUpDown errorPosition in errorsPositions)
                 {
-                    cable.IndicesInversions.Add((int)errorPosition.Value);
+                    if (errorPosition.Validate() && errorPosition.Value != -1)
+                    {
+                        cable.IndicesInversions.Add((int)errorPosition.Value);
+                    }
                 }
+                timerEnvoie.Start();
+                envoie2 = false;
             }
         }
 
@@ -111,7 +120,7 @@ namespace TransmissionSimulation
             }
             else
             {
-
+                //We must push the text backward because we insert at the begining.
                 OnAppend(Environment.NewLine, textBox, DefaultForeColor);
 
                 string errorMessage = "|";
@@ -172,45 +181,61 @@ namespace TransmissionSimulation
         void OnAppend(string text, RichTextBox textBox, Color textColor)
         {
             textBox.SelectionColor = textColor;
-            //textBox.AppendText(text);
             textBox.Text = text + textBox.Text;
             textBox.SelectionColor = textBox.ForeColor;
         }
 
         private void btnInjectTypeError_Click(object sender, EventArgs e)
         {
-            int errorNumber = 0;
-            if (numErrorCorrectible.Validate())
+            if (envoie2)
             {
-                for (int i = (int)numErrorCorrectible.Value; i > 0; --i)
+                int errorNumber = 0;
+                if (numErrorCorrectible.Validate())
                 {
-                    cable.InsertRandomErrors(1, errorNumber * 13, (errorNumber + 1) * 13);
-                    ++errorNumber;
+                    for (int i = (int)numErrorCorrectible.Value; i > 0; --i)
+                    {
+                        cable.InsertRandomErrors(1, errorNumber * 13, (errorNumber + 1) * 13);
+                        ++errorNumber;
+                    }
                 }
-            }
-            if (numErrorDetectable.Validate())
-            {
-                for (int i = (int)numErrorDetectable.Value; i > 0; --i)
+                if (numErrorDetectable.Validate())
                 {
-                    cable.InsertRandomErrors(2, errorNumber * 13, (errorNumber + 1) * 13);
-                    ++errorNumber;
+                    for (int i = (int)numErrorDetectable.Value; i > 0; --i)
+                    {
+                        cable.InsertRandomErrors(2, errorNumber * 13, (errorNumber + 1) * 13);
+                        ++errorNumber;
+                    }
                 }
-            }
-            if (numIrrecoverable.Validate())
-            {
-                for (int i = (int)numIrrecoverable.Value; i > 0; --i)
+                if (numIrrecoverable.Validate())
                 {
-                    cable.InsertRandomErrors(3, errorNumber * 13, (errorNumber + 1) * 13);
-                    ++errorNumber;
+                    for (int i = (int)numIrrecoverable.Value; i > 0; --i)
+                    {
+                        cable.InsertRandomErrors(3, errorNumber * 13, (errorNumber + 1) * 13);
+                        ++errorNumber;
+                    }
                 }
+                timerEnvoie2.Start();
+                envoie2 = false;
             }
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            //Stoping the two stattion
             station1.Stop();
             station2.Stop();
+        }
 
+        private void timerEnvoie_Tick(object sender, EventArgs e)
+        {
+            timerEnvoie.Stop();
+            envoie = true;
+        }
+
+        private void timerEnvoie2_Tick(object sender, EventArgs e)
+        {
+            timerEnvoie2.Stop();
+            envoie2 = true;
         }
     }
 }
