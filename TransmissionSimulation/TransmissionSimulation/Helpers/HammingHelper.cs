@@ -20,8 +20,8 @@ namespace TransmissionSimulation.Helpers
 
         public static BitArray DecryptManager(BitArray bitArrayInput, int padding = 0)
         {
-            BitArray bitArrayOutput = HammingManager(bitArrayInput, GetTotalSize(8), GetDataSize, Decrypt);
-            return ResizeBitArray(bitArrayOutput, bitArrayOutput.Length + padding);
+            BitArray bitArrayOutput = ResizeBitArray(bitArrayInput, bitArrayInput.Length - padding);
+            return HammingManager(bitArrayOutput, GetTotalSize(8), GetDataSize, Decrypt);
         }
 
         private static BitArray ResizeBitArray(BitArray bitArray, int newArraySize, int startIndex = 0)
