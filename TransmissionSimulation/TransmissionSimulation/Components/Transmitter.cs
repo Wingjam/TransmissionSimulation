@@ -22,6 +22,8 @@ namespace TransmissionSimulation.Components
         private Tuple<int, Tuple<int, int>> nextRandomError;
 
         public List<int> IndicesInversions { get; set; }
+        public Tuple<int, Tuple<int, int>> NextRandomError { get => nextRandomError; }
+
 
         public bool ReadyToSendStation1
         {
@@ -150,10 +152,24 @@ namespace TransmissionSimulation.Components
         private BitArray InjectErrorsRandomly(BitArray transferData)
         {
             int endIndex = (nextRandomError.Item2.Item2 > transferData.Length) ? transferData.Length : nextRandomError.Item2.Item2;
+            List<int> listIndex = new List<int>();
 
             for (int i = 0; i < nextRandomError.Item1; ++i)
             {
-                int pos = random.Next(nextRandomError.Item2.Item1, endIndex);
+                bool newRandomIndexFound = false;
+                while (!newRandomIndexFound)
+                {
+                    int pos = random.Next(nextRandomError.Item2.Item1, endIndex);
+                    if (!listIndex.Contains(pos))
+                    {
+                        listIndex.Add(pos);
+                        newRandomIndexFound = true;
+                    }
+                }
+            }
+
+            foreach(int pos in listIndex)
+            {
                 transferData[pos] = !transferData[pos];
             }
 
