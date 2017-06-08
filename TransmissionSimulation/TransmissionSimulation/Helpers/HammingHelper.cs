@@ -172,27 +172,37 @@ namespace TransmissionSimulation.Helpers
             bool isMasterParityCorrect = ((masterParityCount & 1) == 1) == bitArrayInput[0];
             Status status = Status.OK;
 
-            //DETECT (all mode)
-            // 2 bit detection -> there is an errorSyndrome and masterParityCount is correct
-            if (errorSyndrome != 0 && isMasterParityCorrect)
+            // Bits Error
+            if (errorSyndrome != 0)
             {
-                status = Status.DETECTED;
-            }
-
-            // CORRECT
-            // 1 bit error -> there is an errorSyndrome and masterParityCount is wrong
-            else if (errorSyndrome != 0 && !isMasterParityCorrect)
-            {
-                if (mode == Mode.CORRECT)
+                // DETECT (all mode)
+                // 2 bit detection -> there is an errorSyndrome and masterParityCount is correct
+                if (isMasterParityCorrect)
                 {
-                    // The error to correct is at errorSyndrome index
-                    // If the errorSyndrome is valid, correct the value in question
-                    if (errorSyndrome < bitArrayInput.Length)
+                    status = Status.DETECTED;
+                }
+
+                // CORRECT
+                // 1 bit error -> there is an errorSyndrome and masterParityCount is wrong
+                else
+                {
+                    // Mode CORRECT
+                    if (mode == Mode.CORRECT)
                     {
-                        bitArrayInput[errorSyndrome] = !bitArrayInput[errorSyndrome];
-                        status = Status.CORRECTED;
+                        // The error to correct is at errorSyndrome index
+                        // If the errorSyndrome is valid, correct the value in question
+                        if (errorSyndrome < bitArrayInput.Length)
+                        {
+                            bitArrayInput[errorSyndrome] = !bitArrayInput[errorSyndrome];
+                            status = Status.CORRECTED;
+                        }
+                        // Else, there is 3 errors or more that we can detect in the bitArray, don't correct it
+                        else
+                        {
+                            status = Status.DETECTED;
+                        }
                     }
-                    // Else, there is 3 errors or more that we can detect in the bitArray, don't correct it
+                    // Mode DETECT, there is obviously an error
                     else
                     {
                         status = Status.DETECTED;

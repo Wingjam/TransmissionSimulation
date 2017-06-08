@@ -113,22 +113,34 @@ namespace TransmissionSimulationTests.Helpers
             Assert.AreEqual(HammingHelper.Status.OK, tupleEncrypt.Item2);
             Assert.AreEqual(HammingHelper.Status.DETECTED, tupleDecrypt.Item2);
 
+
+            // # Random case with 1 (Detect only 1 bit)
+            bitArray = new BitArray(8)
+            {
+                [0] = true,
+                [1] = true,
+                [5] = true,
+            };
+
+            tupleEncrypt = HammingHelper.EncryptManager(bitArray, HammingHelper.Mode.DETECT);
+            tupleEncrypt.Item1[1] = !tupleEncrypt.Item1[1]; // Inject error here
+            tupleDecrypt = HammingHelper.DecryptManager(tupleEncrypt.Item1, HammingHelper.Mode.DETECT);
+
+            Assert.AreEqual(HammingHelper.Status.OK, tupleEncrypt.Item2);
+            Assert.AreEqual(HammingHelper.Status.DETECTED, tupleDecrypt.Item2);
+
         }
 
         [TestMethod]
         public void TestGetDataSize()
         {
-            //Assert.AreEqual(4, HammingHelper.GetDataSize(8));
-            //Assert.AreEqual(7, HammingHelper.GetDataSize(12));
             Assert.AreEqual(8, HammingHelper.GetDataSize(13));
-            //Assert.AreEqual(512, HammingHelper.GetDataSize(128*8));
+            Assert.AreEqual(16, HammingHelper.GetDataSize(26));
         }
 
         [TestMethod]
         public void TestGetTotalSize()
         {
-            //Assert.AreEqual(8, HammingHelper.GetTotalSize(4));
-            //Assert.AreEqual(12, HammingHelper.GetTotalSize(7));
             Assert.AreEqual(13, HammingHelper.GetTotalSize(8));
             Assert.AreEqual(26, HammingHelper.GetTotalSize(16));
         }
