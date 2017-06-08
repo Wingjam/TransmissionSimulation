@@ -172,7 +172,7 @@ namespace TransmissionSimulation.Components
 
             foreach(int pos in listIndex)
             {
-                transferData[dataLength - 1 - pos] = !transferData[dataLength - 1 - pos];
+                transferData[pos] = !transferData[pos];
             }
 
             nextRandomError = null;
