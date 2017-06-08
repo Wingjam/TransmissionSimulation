@@ -423,6 +423,9 @@ namespace TransmissionSimulation.Components
                                     HighPriorityFrames.Enqueue(OutputBuffer[nakSequenceNumber % BufferSize]);
                                 }
                             }
+                            
+                            // Notify subscriber that a Nak frame has been received
+                            sendFrameDelegate(frameReceived, ReturnTypeOfLastReceivedFrame == HammingHelper.Status.OK ? Constants.FrameEvent.FrameReceivedOk : Constants.FrameEvent.FrameReceivedCorrected, StationId);
                         }
                         else if (frameReceived.Type == Constants.FrameType.Ack)
                         {
