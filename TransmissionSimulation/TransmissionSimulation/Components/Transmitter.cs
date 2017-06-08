@@ -157,7 +157,7 @@ namespace TransmissionSimulation.Components
             for (int i = 0; i < nextRandomError.Item1; ++i)
             {
                 bool newRandomIndexFound = false;
-                while (!newRandomIndexFound)
+                while (!newRandomIndexFound || listIndex.Count >= transferData.Count)
                 {
                     int pos = random.Next(nextRandomError.Item2.Item1, endIndex);
                     if (!listIndex.Contains(pos))
