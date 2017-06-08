@@ -103,7 +103,7 @@ namespace TransmissionSimulation.Models
 
         public override string ToString()
         {
-            string value = Id.ToString("000");
+            string value = Id.ToString("000") + " | ";
             switch (Type)
             {
                 case FrameType.Ack:
@@ -113,24 +113,26 @@ namespace TransmissionSimulation.Models
                     value += "Nak ";
                     break;
                 case FrameType.Data:
-                    value += "Data ";
+                    value += "Data";
                     break;
             }
-            value += "|" + Ack.ToString("00");
+            value += " | " + Ack.ToString("00");
+            value += " | " + DataSize.ToString("000");
+            //"id ={ 1, 2}, type ={ 2, 4}, ack ={ 3, 2}, data lenght = { 4, 3 }={ 6, 3}"
             //value += Data.ToString();
-            StringBuilder sb = new StringBuilder(Data.Length / 4);
+            //StringBuilder sb = new StringBuilder(Data.Length / 4);
 
-            for (int i = 0; i < Data.Length; i += 4)
-            {
-                int v = (Data[i] ? 8 : 0) |
-                        (Data[i + 1] ? 4 : 0) |
-                        (Data[i + 2] ? 2 : 0) |
-                        (Data[i + 3] ? 1 : 0);
+            //for (int i = 0; i < Data.Length; i += 4)
+            //{
+            //    int v = (Data[i] ? 8 : 0) |
+            //            (Data[i + 1] ? 4 : 0) |
+            //            (Data[i + 2] ? 2 : 0) |
+            //            (Data[i + 3] ? 1 : 0);
 
-                sb.Append(v.ToString("x1")); // Or "X1"
-            }
+            //    sb.Append(v.ToString("x1")); // Or "X1"
+            //}
 
-            value += "|"+sb;
+            //value += "|"+sb;
             return value;
         }
     }
