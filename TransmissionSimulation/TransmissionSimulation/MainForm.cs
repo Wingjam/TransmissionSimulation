@@ -181,12 +181,12 @@ namespace TransmissionSimulation
         private void btnInjectTypeError_Click(object sender, EventArgs e)
         {
             int errorNumber = 13;
-            int numberOfBit = HammingHelper.HammingDataSplitNumber +
-                               HammingHelper.GetTotalSize(HammingHelper.HammingDataSplitNumber);
+            int numberOfBit = HammingHelper.GetTotalSize(HammingHelper.HammingDataSplitNumber);
             if (numErrorCorrectible.Validate())
             {
                 for (int i = (int)numErrorCorrectible.Value; i > 0; --i)
                 {
+                    Console.WriteLine("##########################################{0}#######{1}###", errorNumber * numberOfBit, (errorNumber + 1) * numberOfBit);
                     cable.InsertRandomErrors(1, errorNumber * numberOfBit, (errorNumber + 1) * numberOfBit);
                     ++errorNumber;
                 }
