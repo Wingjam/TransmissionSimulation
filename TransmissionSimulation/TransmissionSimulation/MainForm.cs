@@ -20,7 +20,6 @@ namespace TransmissionSimulation
     {
         private bool envoie;
         private bool envoie2;
-        private object lockText;
         private StationParameters station1Parameters;
         private StationParameters station2Parameters;
         private Station station1;
@@ -37,7 +36,6 @@ namespace TransmissionSimulation
             this.station2Parameters = station2Parameters;
             envoie = true;
             envoie2 = true;
-            lockText = new object();
             InitializeComponent();
         }
 
@@ -168,7 +166,7 @@ namespace TransmissionSimulation
                 if (stationId == Constants.StationId.Station2 && (frameEvent == Constants.FrameEvent.FrameReceivedOk ||
                                                                   frameEvent == Constants.FrameEvent.FrameReceivedCorrected))
                 {
-                    int newTotal = transfertBar.Value + (int) frameToShow.DataSize;
+                    int newTotal = transfertBar.Value + (int)frameToShow.DataSize;
                     transfertBar.Value = Math.Min(newTotal, transfertBar.Maximum);
                     if (transfertBar.Value == transfertBar.Maximum)
                     {
@@ -183,13 +181,9 @@ namespace TransmissionSimulation
         void OnAppend(string text, RichTextBox textBox, Color textColor)
         {
 
-            lock (lockText)
-            {
-                textBox.SelectionColor = textColor;
-                textBox.AppendText(text);
-                textBox.SelectionColor = textBox.ForeColor;
-                textBox.ScrollToCaret();
-            }
+            textBox.SelectionColor = textColor;
+            textBox.AppendText(text);
+            textBox.SelectionColor = textBox.ForeColor;
         }
 
         private void btnInjectTypeError_Click(object sender, EventArgs e)
