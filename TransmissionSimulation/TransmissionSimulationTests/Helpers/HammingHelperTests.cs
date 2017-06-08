@@ -152,7 +152,7 @@ namespace TransmissionSimulationTests.Helpers
                 [8] = true,
                 [9] = true,
             };
-            object[] args = new object[3] { bitArrayInput, 18, 0 };
+            object[] args = { bitArrayInput, 18, 0 };
             var bitArrayOutput = (BitArray)hh.InvokeStatic("ResizeBitArray", args);
 
             Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArrayExpected), HammingHelper.BitArrayToDigitString(bitArrayOutput));
