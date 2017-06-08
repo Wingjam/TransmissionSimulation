@@ -152,12 +152,13 @@ namespace TransmissionSimulation.Components
         private BitArray InjectErrorsRandomly(BitArray transferData)
         {
             int endIndex = (nextRandomError.Item2.Item2 > transferData.Length) ? transferData.Length : nextRandomError.Item2.Item2;
+            int startIndex = nextRandomError.Item2.Item1;
             List<int> listIndex = new List<int>();
 
             for (int i = 0; i < nextRandomError.Item1; ++i)
             {
                 bool newRandomIndexFound = false;
-                while (!newRandomIndexFound || listIndex.Count >= transferData.Count)
+                while (!newRandomIndexFound && !(listIndex.Count >= endIndex-startIndex))
                 {
                     int pos = random.Next(nextRandomError.Item2.Item1, endIndex);
                     if (!listIndex.Contains(pos))
