@@ -277,6 +277,12 @@ namespace TransmissionSimulation.Components
                     {
                         // Send the frame
                         SendFrame(frame);
+
+                        if (frame.Type == Constants.FrameType.Data)
+                        {
+                            // If we are sending a frame that was in timeout, we need to register another timeout for it to make sure we send it again should an error occur once again
+                            RegisterTimeout(frame.Id);
+                        }
                     }
                 }
                 else if (transmitterReady && FrameReadyToSend) // - ready to send on wire and frame to send available
