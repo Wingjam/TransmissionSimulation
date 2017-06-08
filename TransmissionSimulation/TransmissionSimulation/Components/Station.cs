@@ -563,7 +563,7 @@ namespace TransmissionSimulation.Components
             // Notify subscriber that frame is being sent
             sendFrameDelegate(frame, Constants.FrameEvent.FrameSent, StationId);
 
-            Console.WriteLine("{5, 11} {0, 12} : id={1, 2}, type={2, 4}, ack={3, 2}, data lenght={4, 3}={6, 3}", "SendFrame", frame.Id, frame.Type.ToString(), frame.Ack, frame.Data.Count / 8, StationId == Constants.StationId.Station1 ? "Station 1" : "Station 2", frame.DataSize);
+            Console.WriteLine("{4, 11} {0, 12} : id={1, 2}, type={2, 4}, ack={3, 2}, data lenght={5, 3}", "SendFrame", frame.Id, frame.Type.ToString(), frame.Ack, StationId == Constants.StationId.Station1 ? "Station 1" : "Station 2", frame.DataSize);
 
             // Send the data
             transmitter.SendData(encodedFrameBitArray, StationId);
@@ -587,16 +587,30 @@ namespace TransmissionSimulation.Components
                 // Keeps the current return type as the last received ones
                 ReturnTypeOfLastReceivedFrame = tuple.Item2;
 
+                // If Hamming detected an error, we return null because the frame is corrupted and Hamming did not fix it
                 bool isCorrupted = tuple.Item2 == HammingHelper.Status.DETECTED;
                 if (isCorrupted)
                 {
+                    Console.WriteLine("corrupted frame received");
                     return null;
                 }
 
                 // Converts BitArray to Frame
                 Frame frame = Frame.GetFrameFromBitArray(frameBitArray);
 
-                Console.WriteLine("{5, 11} {0, 12} : id={1, 2}, type={2, 4}, ack={3, 2}, data lenght={4, 3}={6, 3}", "ReceiveFrame", frame.Id, frame.Type.ToString(), frame.Ack, frame.Data.Count / 8, StationId == Constants.StationId.Station1 ? "Station 1" : "Station 2", frame.DataSize);
+                bool isInvalidFrame = frame.Id >= MaxSequence 
+                    || !Enum.IsDefined(typeof(Constants.FrameType), (int)frame.Type)
+                    || frame.Ack >= MaxSequence
+                    || frame.DataSize > DataSizeInFrame
+                    || frame.Data.Count / 8 > DataSizeInFrame;
+
+                if (isInvalidFrame)
+                {
+                    Console.WriteLine("invalid frame received");
+                    return null;
+                }
+
+                Console.WriteLine("{4, 11} {0, 12} : id={1, 2}, type={2, 4}, ack={3, 2}, data lenght={5, 3}", "ReceiveFrame", frame.Id, frame.Type.ToString(), frame.Ack, StationId == Constants.StationId.Station1 ? "Station 1" : "Station 2", frame.DataSize);
 
                 return frame;
             }
