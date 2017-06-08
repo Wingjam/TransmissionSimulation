@@ -124,6 +124,33 @@ namespace TransmissionSimulation
                 }
                 OnAppend(" | " + frameToShow.Ack.ToString("00"), textBox, DefaultForeColor);
                 OnAppend(" | " + frameToShow.DataSize.ToString("000"), textBox, DefaultForeColor);
+                OnAppend("        ", textBox, DefaultForeColor);
+                string errorMessage = "|";
+                Color errorColor = DefaultForeColor;
+                switch (frameEvent)
+                {
+                    case Constants.FrameEvent.FrameReceivedCorrupted:
+                        errorMessage += "Détecté";
+                        errorColor = Color.Yellow;
+                        break;
+                    case Constants.FrameEvent.FrameReceivedNotAwaited:
+                        break;
+                    case Constants.FrameEvent.FrameReceivedDuplicate:
+                        break;
+                    case Constants.FrameEvent.FrameReceivedOk:
+                        break;
+                    case Constants.FrameEvent.FrameReceivedCorrected:
+                        errorMessage += "Corrigé";
+                        errorColor = Color.DarkGreen;
+                        break;
+                    case Constants.FrameEvent.FrameSent:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(frameEvent), frameEvent, null);
+                }
+                OnAppend(errorMessage, textBox, errorColor);
+
+
                 OnAppend(Environment.NewLine, textBox, DefaultForeColor);
 
                 //Updating the progress bar.

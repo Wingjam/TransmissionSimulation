@@ -31,7 +31,6 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.transfertBar = new System.Windows.Forms.ProgressBar();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.label4 = new System.Windows.Forms.Label();
             this.txtReception = new System.Windows.Forms.RichTextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.btnInject = new System.Windows.Forms.Button();
@@ -53,6 +52,7 @@
             this.numIrrecoverable = new System.Windows.Forms.NumericUpDown();
             this.numErrorDetectable = new System.Windows.Forms.NumericUpDown();
             this.numErrorCorrectible = new System.Windows.Forms.NumericUpDown();
+            this.label4 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.dataSendGroup.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.posError1)).BeginInit();
@@ -77,22 +77,12 @@
             // 
             this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.txtReception);
-            this.groupBox1.Location = new System.Drawing.Point(778, 12);
+            this.groupBox1.Location = new System.Drawing.Point(566, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(299, 409);
+            this.groupBox1.Size = new System.Drawing.Size(511, 409);
             this.groupBox1.TabIndex = 3;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Données reçues";
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Lucida Console", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(6, 49);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(288, 16);
-            this.label4.TabIndex = 2;
-            this.label4.Text = "ID  | Type |#Ack| Data Lengh";
             // 
             // txtReception
             // 
@@ -100,7 +90,7 @@
             this.txtReception.Location = new System.Drawing.Point(6, 68);
             this.txtReception.Name = "txtReception";
             this.txtReception.ReadOnly = true;
-            this.txtReception.Size = new System.Drawing.Size(288, 335);
+            this.txtReception.Size = new System.Drawing.Size(499, 335);
             this.txtReception.TabIndex = 0;
             this.txtReception.Text = "";
             // 
@@ -129,7 +119,7 @@
             this.dataSendGroup.Controls.Add(this.txtDataSend);
             this.dataSendGroup.Location = new System.Drawing.Point(12, 12);
             this.dataSendGroup.Name = "dataSendGroup";
-            this.dataSendGroup.Size = new System.Drawing.Size(299, 409);
+            this.dataSendGroup.Size = new System.Drawing.Size(335, 409);
             this.dataSendGroup.TabIndex = 4;
             this.dataSendGroup.TabStop = false;
             this.dataSendGroup.Text = "Données envoyées";
@@ -140,9 +130,9 @@
             this.label3.Font = new System.Drawing.Font("Lucida Console", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label3.Location = new System.Drawing.Point(6, 52);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(288, 16);
+            this.label3.Size = new System.Drawing.Size(308, 16);
             this.label3.TabIndex = 1;
-            this.label3.Text = "ID  | Type |#Ack| Data Lengh";
+            this.label3.Text = "ID  | Type |#Ack| Data Lengh |";
             // 
             // txtDataSend
             // 
@@ -150,7 +140,7 @@
             this.txtDataSend.Location = new System.Drawing.Point(3, 68);
             this.txtDataSend.Name = "txtDataSend";
             this.txtDataSend.ReadOnly = true;
-            this.txtDataSend.Size = new System.Drawing.Size(291, 335);
+            this.txtDataSend.Size = new System.Drawing.Size(326, 335);
             this.txtDataSend.TabIndex = 0;
             this.txtDataSend.Text = "";
             // 
@@ -198,7 +188,7 @@
             this.groupBox2.Controls.Add(this.posError1);
             this.groupBox2.Controls.Add(this.posError3);
             this.groupBox2.Controls.Add(this.posError2);
-            this.groupBox2.Location = new System.Drawing.Point(317, 12);
+            this.groupBox2.Location = new System.Drawing.Point(396, 12);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(131, 206);
             this.groupBox2.TabIndex = 11;
@@ -215,16 +205,16 @@
             this.groupBox3.Controls.Add(this.numIrrecoverable);
             this.groupBox3.Controls.Add(this.numErrorDetectable);
             this.groupBox3.Controls.Add(this.numErrorCorrectible);
-            this.groupBox3.Location = new System.Drawing.Point(455, 13);
+            this.groupBox3.Location = new System.Drawing.Point(353, 229);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(207, 205);
+            this.groupBox3.Size = new System.Drawing.Size(207, 192);
             this.groupBox3.TabIndex = 12;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Insertion aléatoire";
             // 
             // btnInjectTypeError
             // 
-            this.btnInjectTypeError.Location = new System.Drawing.Point(40, 174);
+            this.btnInjectTypeError.Location = new System.Drawing.Point(48, 163);
             this.btnInjectTypeError.Name = "btnInjectTypeError";
             this.btnInjectTypeError.Size = new System.Drawing.Size(120, 23);
             this.btnInjectTypeError.TabIndex = 11;
@@ -235,7 +225,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(52, 124);
+            this.label8.Location = new System.Drawing.Point(57, 139);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(146, 13);
             this.label8.TabIndex = 16;
@@ -244,7 +234,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(52, 98);
+            this.label7.Location = new System.Drawing.Point(57, 113);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(135, 13);
             this.label7.TabIndex = 15;
@@ -254,14 +244,14 @@
             // 
             this.label6.Location = new System.Drawing.Point(6, 16);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(195, 49);
+            this.label6.Size = new System.Drawing.Size(195, 31);
             this.label6.TabIndex = 11;
             this.label6.Text = "Choisir le nombre d\'erreurs de chaque type";
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(52, 70);
+            this.label5.Location = new System.Drawing.Point(57, 85);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(122, 13);
             this.label5.TabIndex = 14;
@@ -269,24 +259,34 @@
             // 
             // numIrrecoverable
             // 
-            this.numIrrecoverable.Location = new System.Drawing.Point(6, 122);
+            this.numIrrecoverable.Location = new System.Drawing.Point(11, 137);
             this.numIrrecoverable.Name = "numIrrecoverable";
             this.numIrrecoverable.Size = new System.Drawing.Size(40, 20);
             this.numIrrecoverable.TabIndex = 13;
             // 
             // numErrorDetectable
             // 
-            this.numErrorDetectable.Location = new System.Drawing.Point(6, 96);
+            this.numErrorDetectable.Location = new System.Drawing.Point(11, 111);
             this.numErrorDetectable.Name = "numErrorDetectable";
             this.numErrorDetectable.Size = new System.Drawing.Size(40, 20);
             this.numErrorDetectable.TabIndex = 12;
             // 
             // numErrorCorrectible
             // 
-            this.numErrorCorrectible.Location = new System.Drawing.Point(6, 68);
+            this.numErrorCorrectible.Location = new System.Drawing.Point(11, 83);
             this.numErrorCorrectible.Name = "numErrorCorrectible";
             this.numErrorCorrectible.Size = new System.Drawing.Size(40, 20);
             this.numErrorCorrectible.TabIndex = 11;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Lucida Console", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.Location = new System.Drawing.Point(6, 52);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(378, 16);
+            this.label4.TabIndex = 2;
+            this.label4.Text = "ID  | Type |#Ack| Data Lengh | Erreur";
             // 
             // MainForm
             // 
@@ -337,7 +337,6 @@
         private System.Windows.Forms.NumericUpDown posError4;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label4;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.NumericUpDown numIrrecoverable;
@@ -348,5 +347,6 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label4;
     }
 }
