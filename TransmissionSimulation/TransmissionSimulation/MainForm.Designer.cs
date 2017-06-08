@@ -293,12 +293,12 @@
             // 
             // timerEnvoie
             // 
-            this.timerEnvoie.Interval = 1000;
+            this.timerEnvoie.Interval = 1200;
             this.timerEnvoie.Tick += new System.EventHandler(this.timerEnvoie_Tick);
             // 
             // timerEnvoie2
             // 
-            this.timerEnvoie2.Interval = 1000;
+            this.timerEnvoie2.Interval = 1200;
             this.timerEnvoie2.Tick += new System.EventHandler(this.timerEnvoie2_Tick);
             // 
             // MainForm

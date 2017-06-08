@@ -102,7 +102,7 @@ namespace TransmissionSimulation
                     }
                 }
                 timerEnvoie.Start();
-                envoie2 = false;
+                //envoie2 = false;
             }
         }
 
@@ -120,9 +120,22 @@ namespace TransmissionSimulation
             }
             else
             {
-                //We must push the text backward because we insert at the begining.
-                OnAppend(Environment.NewLine, textBox, DefaultForeColor);
-
+                OnAppend(frameToShow.Id.ToString("000") + " | ", textBox, DefaultForeColor);
+                switch (frameToShow.Type)
+                {
+                    case Constants.FrameType.Ack:
+                        OnAppend("Ack ", textBox, Color.Green);
+                        break;
+                    case Constants.FrameType.Nak:
+                        OnAppend("Nak ", textBox, Color.DarkRed);
+                        break;
+                    case Constants.FrameType.Data:
+                        OnAppend("Data", textBox, DefaultForeColor);
+                        break;
+                }
+                OnAppend(" | " + frameToShow.Ack.ToString("00"), textBox, DefaultForeColor);
+                OnAppend(" | " + frameToShow.DataSize.ToString("000"), textBox, DefaultForeColor);
+                OnAppend("        ", textBox, DefaultForeColor);
                 string errorMessage = "|";
                 Color errorColor = DefaultForeColor;
                 switch (frameEvent)
@@ -147,23 +160,9 @@ namespace TransmissionSimulation
                         throw new ArgumentOutOfRangeException(nameof(frameEvent), frameEvent, null);
                 }
                 OnAppend(errorMessage, textBox, errorColor);
-                OnAppend("        ", textBox, DefaultForeColor);
-                OnAppend(" | " + frameToShow.DataSize.ToString("000"), textBox, DefaultForeColor);
-                OnAppend(" | " + ((Int16)frameToShow.Ack).ToString("00"), textBox, DefaultForeColor);
 
-                switch (frameToShow.Type)
-                {
-                    case Constants.FrameType.Ack:
-                        OnAppend("Ack ", textBox, Color.DarkGreen);
-                        break;
-                    case Constants.FrameType.Nak:
-                        OnAppend("Nak ", textBox, Color.DarkRed);
-                        break;
-                    case Constants.FrameType.Data:
-                        OnAppend("Data", textBox, DefaultForeColor);
-                        break;
-                }
-                OnAppend(((Int16)frameToShow.Id).ToString("000") + " | ", textBox, DefaultForeColor);
+
+                OnAppend(Environment.NewLine, textBox, DefaultForeColor);
 
                 //Updating the progress bar.
                 if (stationId == Constants.StationId.Station2 && (frameEvent == Constants.FrameEvent.FrameReceivedOk ||
@@ -181,8 +180,9 @@ namespace TransmissionSimulation
         void OnAppend(string text, RichTextBox textBox, Color textColor)
         {
             textBox.SelectionColor = textColor;
-            textBox.Text = text + textBox.Text;
+            textBox.AppendText(text);
             textBox.SelectionColor = textBox.ForeColor;
+            textBox.ScrollToCaret();
         }
 
         private void btnInjectTypeError_Click(object sender, EventArgs e)
@@ -215,7 +215,7 @@ namespace TransmissionSimulation
                     }
                 }
                 timerEnvoie2.Start();
-                envoie2 = false;
+                //envoie2 = false;
             }
         }
 
