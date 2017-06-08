@@ -206,7 +206,6 @@ namespace TransmissionSimulation.Components
         {
             mutex.WaitOne();
 
-
             if (station == Constants.Station.Station1 && !DataReceivedStation2)
             {
                 sendingStation1 = data;
