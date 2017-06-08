@@ -111,7 +111,7 @@ namespace TransmissionSimulation
             }
             else
             {
-                OnAppend(frameToShow.Id.ToString("000") + " | ", textBox, DefaultForeColor);
+                OnAppend(((Int16)frameToShow.Id).ToString("000") + " | ", textBox, DefaultForeColor);
                 switch (frameToShow.Type)
                 {
                     case Constants.FrameType.Ack:
@@ -124,7 +124,7 @@ namespace TransmissionSimulation
                         OnAppend("Data", textBox, DefaultForeColor);
                         break;
                 }
-                OnAppend(" | " + frameToShow.Ack.ToString("00"), textBox, DefaultForeColor);
+                OnAppend(" | " + ((Int16)frameToShow.Ack).ToString("00"), textBox, DefaultForeColor);
                 OnAppend(" | " + frameToShow.DataSize.ToString("000"), textBox, DefaultForeColor);
                 OnAppend("        ", textBox, DefaultForeColor);
                 string errorMessage = "|";
@@ -164,7 +164,7 @@ namespace TransmissionSimulation
                     {
                         MessageBox.Show(this, "Tranfert complété!");
                         //TODO fermer le programme correctement
-                        this.Close();
+                        //this.Close();
                     }
                 }
             }
