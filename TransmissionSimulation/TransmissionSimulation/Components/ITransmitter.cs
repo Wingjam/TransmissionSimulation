@@ -9,5 +9,6 @@ namespace TransmissionSimulation.Components
         void SendData(BitArray data, Constants.Station station);
         bool DataReceived(Constants.Station station);
         BitArray GetData(Constants.Station station);
+        void InsertRandomErrors(int errorCount, int startIndex, int endIndex);
     }
 }

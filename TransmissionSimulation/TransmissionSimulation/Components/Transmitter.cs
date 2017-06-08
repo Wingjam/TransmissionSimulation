@@ -154,6 +154,17 @@ namespace TransmissionSimulation.Components
         }
 
         /// <summary>
+        /// Specify errors to be insert randomly on next data transfer
+        /// </summary>
+        /// <param name="errorCount">Number of errors</param>
+        /// <param name="startIndex">Position in data bitarray to start error insertion</param>
+        /// <param name="endIndex">Position in data bitarray to end error insertion</param>
+        public void InsertRandomErrors(int errorCount, int startIndex, int endIndex)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Checks if the transmitter is ready to send data for the station.
         /// </summary>
         /// <returns><c>true</c>, if transmitter ready is ready for the station, <c>false</c> otherwise.</returns>
