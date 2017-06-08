@@ -12,6 +12,7 @@ namespace TransmissionSimulation.Components
 {
     class Station
     {
+
         #region Referenced objects
 
         ITransmitter transmitter;
@@ -58,9 +59,19 @@ namespace TransmissionSimulation.Components
         int BufferSize { get; set; }
 
         /// <summary>
-        /// Timeout in miliseconds before resending a frame that was no acknoledged by the receiver
+        /// Timeout in miliseconds before resending a frame that was no acknowledged by the receiver
         /// </summary>
         int TimeoutInMs { get; set; }
+
+        /// <summary>
+        /// Boolean that stops the execution of the Station
+        /// </summary>
+        bool StopExecution { get; set; }
+
+        /// <summary>
+        /// Boolean indicating that execution of the station has been successfully stopped
+        /// </summary>
+        bool ExecutionStopped { get; set; }
 
         #endregion
 
@@ -118,6 +129,7 @@ namespace TransmissionSimulation.Components
                 {
                     outputWindowSize += MaxSequence;
                 }
+
                 return fileNotEntirelySent && outputWindowSize < BufferSize;
             }
         }
@@ -158,6 +170,11 @@ namespace TransmissionSimulation.Components
         System.Timers.Timer AckTimer { get; set; }
         volatile bool sendAck;
 
+        /// <summary>
+        /// Hamming return type of the last Received frame. Shouldn't be a property, but hot fixed for now.
+        /// </summary>
+        HammingHelper.ReturnType ReturnTypeOfLastReceivedFrame { get; set; }
+
         #endregion
 
         #region Constructors
@@ -180,6 +197,8 @@ namespace TransmissionSimulation.Components
             this.inputFileStream = inputFileStream;
             this.outputFileStream = outputFileStream;
             this.sendFrameDelegate = sendFrame;
+            StopExecution = false;
+            ExecutionStopped = false;
 
             // Initialize constants
             int frameSizeBeforeHamming = HammingHelper.GetDataSize(Constants.FrameSize * 8) / 8;
@@ -217,7 +236,7 @@ namespace TransmissionSimulation.Components
         /// </summary>
         public void Start()
         {
-            while (true)
+            while (!StopExecution)
             {
                 //events (in order of priority):
                 // - high priority frame ready (examples : nak is ready to be sent, we need to resend a frame for which a nak was received, we need to resend a frame for which the timeout occured)
@@ -246,6 +265,7 @@ namespace TransmissionSimulation.Components
                     // Update frame Ack to latest Ack
                     frame.Ack = DecrementSequenceNumber(NextFrameToReceive);
 
+                    // Makes sure that if we send a data frame, it is still a frame that was not acknowledge. We shouldn't resend a frame that was aknowledge.
                     if (frame.Type != Constants.FrameType.Data || OutputBuffer.ContainsKey(frame.Id % BufferSize))
                     {
                         // Send the frame
@@ -342,7 +362,7 @@ namespace TransmissionSimulation.Components
                                     InputBuffer.Add(frameReceived.Id % BufferSize, frameReceived);
                                     
                                     // Notify subscriber that frame is being received and was new (so it is ok)
-                                    sendFrameDelegate(frameReceived, Constants.FrameEvent.FrameReceivedOk, StationId);
+                                    sendFrameDelegate(frameReceived, ReturnTypeOfLastReceivedFrame == HammingHelper.ReturnType.OK ? Constants.FrameEvent.FrameReceivedOk : Constants.FrameEvent.FrameReceivedCorrected, StationId);
                                 }
                                 else
                                 {
@@ -352,7 +372,7 @@ namespace TransmissionSimulation.Components
                             }
                             else
                             {
-                                // Notify subscriber that frame is being received, but is not in a frame that was awaited currently.
+                                // Notify subscriber that frame is being received, but is not a frame that is awaited currently (so it is dropped).
                                 sendFrameDelegate(frameReceived, Constants.FrameEvent.FrameReceivedNotAwaited, StationId);
                             }
 
@@ -396,6 +416,11 @@ namespace TransmissionSimulation.Components
                                 }
                             }
                         }
+                        else if (frameReceived.Type == Constants.FrameType.Ack)
+                        {
+                            // Notify subscriber that an ack frame has been received
+                            sendFrameDelegate(frameReceived, ReturnTypeOfLastReceivedFrame == HammingHelper.ReturnType.OK ? Constants.FrameEvent.FrameReceivedOk : Constants.FrameEvent.FrameReceivedCorrected, StationId);
+                        }
 
                         // Update the NextAwaitedAckSequenceNumber value with the Ack in the frame. 
                         while (IsBetween(FirstFrameSent, frameReceived.Ack, NextFrameToSendSequenceNumber))
@@ -432,6 +457,19 @@ namespace TransmissionSimulation.Components
                     }
                 }
             }
+
+            // Indicate that execution was stopped
+            ExecutionStopped = true;
+        }
+
+        public void Stop()
+        {
+            // Issue command to stop execution
+            StopExecution = true;
+
+            // Waits for execution to be stopped
+            while (!ExecutionStopped)
+                ;
         }
 
         /// <summary>
@@ -537,22 +575,22 @@ namespace TransmissionSimulation.Components
             {
                 // there is indeed a data, we are going to get it
                 BitArray encodedFrameBitArray = transmitter.GetData(StationId);
+                
+                // Decode the frame
+                Tuple<BitArray, HammingHelper.ReturnType> tuple = HammingHelper.DecryptManager(encodedFrameBitArray, HammingHelper.Mode.CORRECT, EncodedFramePadding);
+                BitArray frameBitArray = tuple.Item1;
 
-                // ****************************************************
-                // TODO Check if data is corrupted (NEED JONATHAN TO ADD A SERVICE TO ITS HAMMING HELPER)
-                // ****************************************************
-                bool isCorrupted = false;
+                bool isCorrupted = tuple.Item2 == HammingHelper.ReturnType.DETECTED;
                 if (isCorrupted)
                 {
                     return null;
                 }
 
-                // Decode the frame
-                Tuple<BitArray, HammingHelper.ReturnType> tuple = HammingHelper.DecryptManager(encodedFrameBitArray, HammingHelper.Mode.CORRECT, EncodedFramePadding);
-                BitArray frameBitArray = tuple.Item1;
-
                 // Converts BitArray to Frame
                 Frame frame = Frame.GetFrameFromBitArray(frameBitArray);
+
+                // Keeps the current return type as the last received ones
+                ReturnTypeOfLastReceivedFrame = tuple.Item2;
 
                 Console.WriteLine("{5, 11} {0, 12} : id={1, 2}, type={2, 4}, ack={3, 2}, data lenght={4, 3}={6, 3}", "ReceiveFrame", frame.Id, frame.Type.ToString(), frame.Ack, frame.Data.Count / 8, StationId == Constants.StationId.Station1 ? "Station 1" : "Station 2", frame.DataSize);
 
