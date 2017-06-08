@@ -18,11 +18,10 @@ namespace TransmissionSimulation.Components
         private bool dataReceivedStation2;
         private bool readyToSendStation2;
         private bool dataReceivedStation1;
-        private uint bitInversions;
+        private Tuple<int, Tuple<int, int>> nextRandomError;
 
         public List<int> IndicesInversions { get; set; }
-        
-        public uint BitInversions { set => bitInversions = value; }
+
         public bool ReadyToSendStation1
         {
             get => readyToSendStation1;
@@ -77,7 +76,7 @@ namespace TransmissionSimulation.Components
             dataReceivedStation2 = false;
             readyToSendStation2 = true;
             dataReceivedStation1 = false;
-            bitInversions = 0;
+            nextRandomError = null;
             IndicesInversions = new List<int>();
         }
 
@@ -94,7 +93,10 @@ namespace TransmissionSimulation.Components
                 BitArray transferData = sendingStation1;
                 sendingStation1 = null;
                 Thread.Sleep(Constants.DefaultDelay * 100); //deciseconds to milliseconds
-                transferData = InjectErrors(transferData);
+                if (nextRandomError != null)
+                    transferData = InjectErrorsRandomly(transferData);
+                else
+                    transferData = InjectErrors(transferData);
                 receivingStation2 = transferData;
                 readyToSendStation1 = true;
                 dataReceivedStation2 = true;
@@ -105,7 +107,10 @@ namespace TransmissionSimulation.Components
                 BitArray transferData = sendingStation2;
                 sendingStation2 = null;
                 Thread.Sleep(Constants.DefaultDelay * 100);
-                transferData = InjectErrors(transferData);
+                if (nextRandomError != null)
+                    transferData = InjectErrorsRandomly(transferData);
+                else
+                    transferData = InjectErrors(transferData);
                 receivingStation1 = transferData;
                 readyToSendStation2 = true;
                 dataReceivedStation1 = true;
@@ -142,13 +147,15 @@ namespace TransmissionSimulation.Components
         /// <param name="transferData">Data to insert errors into.</param>
         private BitArray InjectErrorsRandomly(BitArray transferData)
         {
-            for (int i = 0; i < bitInversions; ++i)
+            int endIndex = (nextRandomError.Item2.Item2 > transferData.Length) ? transferData.Length : nextRandomError.Item2.Item2;
+
+            for (int i = 0; i < nextRandomError.Item1; ++i)
             {
-                int pos = new Random().Next(0, transferData.Length);
+                int pos = new Random().Next(nextRandomError.Item2.Item1, endIndex);
                 transferData[pos] = !transferData[pos];
             }
 
-            bitInversions = 0;
+            nextRandomError = null;
 
             return transferData;
         }
@@ -157,11 +164,14 @@ namespace TransmissionSimulation.Components
         /// Specify errors to be insert randomly on next data transfer
         /// </summary>
         /// <param name="errorCount">Number of errors</param>
-        /// <param name="startIndex">Position in data bitarray to start error insertion</param>
-        /// <param name="endIndex">Position in data bitarray to end error insertion</param>
+        /// <param name="startIndex">Position in data bitarray to start error insertion (included)</param>
+        /// <param name="endIndex">Position in data bitarray to end error insertion (excluded)</param>
         public void InsertRandomErrors(int errorCount, int startIndex, int endIndex)
         {
-            throw new NotImplementedException();
+            if (errorCount >= 0 && startIndex >= 0 && endIndex >= 0)
+                nextRandomError = new Tuple<int, Tuple<int, int>>(errorCount, new Tuple<int, int>(startIndex, endIndex));
+            else
+                throw new FormatException("Error count and indexes must be greater than 0.");
         }
 
         /// <summary>
