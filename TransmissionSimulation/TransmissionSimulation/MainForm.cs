@@ -37,6 +37,7 @@ namespace TransmissionSimulation
             this.station2Parameters = station2Parameters;
             envoie = true;
             envoie2 = true;
+            lockText = new object();
             InitializeComponent();
         }
 
