@@ -190,7 +190,7 @@ namespace TransmissionSimulation.Components
         /// <summary>
         /// Checks if data was received for the station.
         /// </summary>
-        /// <returns><c>true</c>, if received was dataed, <c>false</c> otherwise.</returns>
+        /// <returns><c>true</c>, if data was received, <c>false</c> otherwise.</returns>
         /// <param name="station">Station that checks for data received.</param>
         public bool DataReceived(Constants.Station station)
         {
