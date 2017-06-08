@@ -178,7 +178,7 @@ namespace TransmissionSimulation.Components
         /// <summary>
         /// Hamming return type of the last Received frame. Shouldn't be a property, but hot fixed for now.
         /// </summary>
-        HammingHelper.ReturnType ReturnTypeOfLastReceivedFrame { get; set; }
+        HammingHelper.Status ReturnTypeOfLastReceivedFrame { get; set; }
 
         #endregion
 
@@ -369,7 +369,7 @@ namespace TransmissionSimulation.Components
                                     InputBuffer.Add(frameReceived.Id % BufferSize, frameReceived);
                                     
                                     // Notify subscriber that frame is being received and was new (so it is ok)
-                                    sendFrameDelegate(frameReceived, ReturnTypeOfLastReceivedFrame == HammingHelper.ReturnType.OK ? Constants.FrameEvent.FrameReceivedOk : Constants.FrameEvent.FrameReceivedCorrected, StationId);
+                                    sendFrameDelegate(frameReceived, ReturnTypeOfLastReceivedFrame == HammingHelper.Status.OK ? Constants.FrameEvent.FrameReceivedOk : Constants.FrameEvent.FrameReceivedCorrected, StationId);
                                 }
                                 else
                                 {
@@ -426,7 +426,7 @@ namespace TransmissionSimulation.Components
                         else if (frameReceived.Type == Constants.FrameType.Ack)
                         {
                             // Notify subscriber that an ack frame has been received
-                            sendFrameDelegate(frameReceived, ReturnTypeOfLastReceivedFrame == HammingHelper.ReturnType.OK ? Constants.FrameEvent.FrameReceivedOk : Constants.FrameEvent.FrameReceivedCorrected, StationId);
+                            sendFrameDelegate(frameReceived, ReturnTypeOfLastReceivedFrame == HammingHelper.Status.OK ? Constants.FrameEvent.FrameReceivedOk : Constants.FrameEvent.FrameReceivedCorrected, StationId);
                         }
 
                         // Update the NextAwaitedAckSequenceNumber value with the Ack in the frame. 
@@ -560,7 +560,7 @@ namespace TransmissionSimulation.Components
         {
             // Prepare the frame to be sent on the wire (converts to BitArray and encode for error control with Hamming)
             BitArray frameBitArray = frame.GetFrameAsByteArray();
-            Tuple<BitArray, HammingHelper.ReturnType> tuple = HammingHelper.EncryptManager(frameBitArray, CorrectionMode, EncodedFramePadding);
+            Tuple<BitArray, HammingHelper.Status> tuple = HammingHelper.EncryptManager(frameBitArray, CorrectionMode, EncodedFramePadding);
             BitArray encodedFrameBitArray = tuple.Item1;
 
             // Notify subscriber that frame is being sent
@@ -584,13 +584,13 @@ namespace TransmissionSimulation.Components
                 BitArray encodedFrameBitArray = transmitter.GetData(StationId);
                 
                 // Decode the frame
-                Tuple<BitArray, HammingHelper.ReturnType> tuple = HammingHelper.DecryptManager(encodedFrameBitArray, CorrectionMode, EncodedFramePadding);
+                Tuple<BitArray, HammingHelper.Status> tuple = HammingHelper.DecryptManager(encodedFrameBitArray, CorrectionMode, EncodedFramePadding);
                 BitArray frameBitArray = tuple.Item1;
                 
                 // Keeps the current return type as the last received ones
                 ReturnTypeOfLastReceivedFrame = tuple.Item2;
 
-                bool isCorrupted = tuple.Item2 == HammingHelper.ReturnType.DETECTED;
+                bool isCorrupted = tuple.Item2 == HammingHelper.Status.DETECTED;
                 if (isCorrupted)
                 {
                     return null;

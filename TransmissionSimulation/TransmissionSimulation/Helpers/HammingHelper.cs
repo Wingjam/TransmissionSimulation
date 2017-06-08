@@ -19,53 +19,84 @@ namespace TransmissionSimulation.Helpers
             DETECT,
         }
 
-        public enum ReturnType
+        public enum Status
         {
             OK,
             CORRECTED,
             DETECTED,
         }
 
-        public static Tuple<BitArray, ReturnType> EncryptManager(BitArray bitArrayInput, Mode mode, int padding = 0)
+        /// <summary>
+        /// Public encrypt manager with padding management
+        /// </summary>
+        /// <param name="bitArrayInput"></param>
+        /// <param name="mode"></param>
+        /// <param name="padding"></param>
+        /// <returns></returns>
+        public static Tuple<BitArray, Status> EncryptManager(BitArray bitArrayInput, Mode mode, int padding = 0)
         {
-            Tuple<BitArray, ReturnType> tuple = HammingManager(bitArrayInput, mode, HammingDataSplitNumber, GetTotalSize, Encrypt);
+            Tuple<BitArray, Status> tuple = HammingManager(bitArrayInput, mode, HammingDataSplitNumber, GetTotalSize, Encrypt);
             return Tuple.Create(ResizeBitArray(tuple.Item1, tuple.Item1.Length + padding), tuple.Item2);
         }
 
-        public static Tuple<BitArray, ReturnType> DecryptManager(BitArray bitArrayInput, Mode mode, int padding = 0)
+        /// <summary>
+        /// Public decrypt manager with padding management
+        /// </summary>
+        /// <param name="bitArrayInput"></param>
+        /// <param name="mode"></param>
+        /// <param name="padding"></param>
+        /// <returns></returns>
+        public static Tuple<BitArray, Status> DecryptManager(BitArray bitArrayInput, Mode mode, int padding = 0)
         {
             BitArray bitArrayOutput = ResizeBitArray(bitArrayInput, bitArrayInput.Length - padding);
             return HammingManager(bitArrayOutput, mode, GetTotalSize(HammingDataSplitNumber), GetDataSize, Decrypt);
         }
 
-        private static Tuple<BitArray, ReturnType> HammingManager(BitArray bitArrayInput, Mode mode, int magicNumber, Func<int, int> outputSize, Func<BitArray, Mode, Tuple<BitArray, ReturnType>> hamming)
+        /// <summary>
+        /// Hamming Manager.
+        /// </summary>
+        /// <param name="bitArrayInput"></param>
+        /// <param name="mode"></param>
+        /// <param name="splitNumber"></param>
+        /// <param name="outputSize"></param>
+        /// <param name="hamming"></param>
+        /// <returns></returns>
+        private static Tuple<BitArray, Status> HammingManager(BitArray bitArrayInput, Mode mode, int splitNumber, Func<int, int> outputSize, Func<BitArray, Mode, Tuple<BitArray, Status>> hamming)
         {
-            ReturnType returnType = ReturnType.OK;
-            if (bitArrayInput.Length % magicNumber != 0)
-                throw new ArgumentException("BitArray size must be multiple of " + magicNumber);
+            Status status = Status.OK;
+            if (bitArrayInput.Length % splitNumber != 0)
+                throw new ArgumentException("BitArray size must be multiple of " + splitNumber);
 
             Boolean[] arrayOuput = new Boolean[outputSize(bitArrayInput.Length)];
 
-            for (int i = 0; i < bitArrayInput.Length / magicNumber; i++)
+            for (int i = 0; i < bitArrayInput.Length / splitNumber; i++)
             {
-                // Create a new BitArray of size magicNumber
-                BitArray subBitsArray = ResizeBitArray(bitArrayInput, magicNumber, i * magicNumber);
+                // Create a new BitArray of size (part i) * splitNumber
+                BitArray subBitsArray = ResizeBitArray(bitArrayInput, splitNumber, i * splitNumber);
 
                 // Encrypt/Decrypt it
-                Tuple<BitArray, ReturnType> tuple = hamming(subBitsArray, mode);
+                Tuple<BitArray, Status> tuple = hamming(subBitsArray, mode);
 
-                // Get the returnType
-                if (tuple.Item2 > returnType)
-                    returnType = tuple.Item2;
+                // Get the higher status
+                if (tuple.Item2 > status)
+                    status = tuple.Item2;
 
                 // Add the output (part i) to the arrayOutput
                 tuple.Item1.CopyTo(arrayOuput, i * tuple.Item1.Length);
             }
 
-            return Tuple.Create(new BitArray(arrayOuput), returnType);
+            return Tuple.Create(new BitArray(arrayOuput), status);
         }
 
-        private static Tuple<BitArray, ReturnType> Encrypt(BitArray bitArrayInput, Mode mode)
+        /// <summary>
+        /// Encrypt the data bits with Hamming Code.
+        /// Each power of 2 is a bit of controle (parity)
+        /// The first bit (index 0) is the master bit of controle (overall parity)
+        /// </summary>
+        /// <param name="bitArrayInput"></param>
+        /// <param name="mode"></param>
+        /// <returns>New encoded BitArray with a bigger size (data + bit of controle) and an OK status</returns>
+        private static Tuple<BitArray, Status> Encrypt(BitArray bitArrayInput, Mode mode)
         {
             int indiceInput = 0;
 
@@ -102,10 +133,18 @@ namespace TransmissionSimulation.Helpers
             // Write 1 for odd and 0 for even
             bitArrayOutput[0] = (masterParityCount & 1) == 1;
             
-            return Tuple.Create(bitArrayOutput, ReturnType.OK);
+            return Tuple.Create(bitArrayOutput, Status.OK);
         }
 
-        private static Tuple<BitArray, ReturnType> Decrypt(BitArray bitArrayInput, Mode mode)
+        /// <summary>
+        /// Decrypt the bits encrypt by the hamming code. 
+        /// According to the mode, the decrypt function can CORRECT 1 bit error or DETECT 2 bits error.
+        /// Sometime, it can detect 3 or more error bits when trying to CORRECT.
+        /// </summary>
+        /// <param name="bitArrayInput"></param>
+        /// <param name="mode"></param>
+        /// <returns>New decoded BitArray with a smaller size (only data) and a status (OK, CORRECTED or DETECTED)</returns>
+        private static Tuple<BitArray, Status> Decrypt(BitArray bitArrayInput, Mode mode)
         {
             int errorSyndrome = 0;
             int masterParityCount = 0;
@@ -131,13 +170,13 @@ namespace TransmissionSimulation.Helpers
 
             //masterParityCount : 1 for odd and 0 for even
             bool isMasterParityCorrect = ((masterParityCount & 1) == 1) == bitArrayInput[0];
-            ReturnType returnType = ReturnType.OK;
+            Status status = Status.OK;
 
             //DETECT (all mode)
             // 2 bit detection -> there is an errorSyndrome and masterParityCount is correct
             if (errorSyndrome != 0 && isMasterParityCorrect)
             {
-                returnType = ReturnType.DETECTED;
+                status = Status.DETECTED;
             }
 
             // CORRECT
@@ -151,12 +190,12 @@ namespace TransmissionSimulation.Helpers
                     if (errorSyndrome < bitArrayInput.Length)
                     {
                         bitArrayInput[errorSyndrome] = !bitArrayInput[errorSyndrome];
-                        returnType = ReturnType.CORRECTED;
+                        status = Status.CORRECTED;
                     }
                     // Else, there is 3 errors or more that we can detect in the bitArray, don't correct it
                     else
                     {
-                        returnType = ReturnType.DETECTED;
+                        status = Status.DETECTED;
                     }
                 }
             }
@@ -175,7 +214,7 @@ namespace TransmissionSimulation.Helpers
                 }
             }
 
-            return Tuple.Create(bitArrayOutput, returnType);
+            return Tuple.Create(bitArrayOutput, status);
         }
 
         /// <summary>
