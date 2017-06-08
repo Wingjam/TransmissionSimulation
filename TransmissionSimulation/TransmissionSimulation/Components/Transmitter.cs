@@ -160,7 +160,7 @@ namespace TransmissionSimulation.Components
                 bool newRandomIndexFound = false;
                 while (!newRandomIndexFound && !(listIndex.Count >= endIndex-startIndex))
                 {
-                    int pos = random.Next(nextRandomError.Item2.Item1, endIndex);
+                    int pos = random.Next(startIndex, endIndex);
                     if (!listIndex.Contains(pos))
                     {
                         listIndex.Add(pos);
