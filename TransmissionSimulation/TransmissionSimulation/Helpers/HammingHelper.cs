@@ -12,42 +12,32 @@ namespace TransmissionSimulation.Helpers
 {
     public static class HammingHelper
     {
-        public static BitArray EncryptManager(BitArray bitArrayInput, int padding = 0)
+        public enum Mode
         {
-            BitArray bitArrayOutput = HammingManager(bitArrayInput, 8, GetTotalSize, Encrypt);
-            return ResizeBitArray(bitArrayOutput, bitArrayOutput.Length + padding);
+            CORRECT,
+            DETECT,
+        }
+        public enum ReturnType
+        {
+            OK,
+            CORRECTED,
+            DETECTED,
+        }
+        public static Tuple<BitArray, ReturnType> EncryptManager(BitArray bitArrayInput, Mode mode, int padding = 0)
+        {
+            Tuple<BitArray, ReturnType> tuple = HammingManager(bitArrayInput, mode, 8, GetTotalSize, Encrypt);
+            return Tuple.Create(ResizeBitArray(tuple.Item1, tuple.Item1.Length + padding), tuple.Item2);
         }
 
-        public static BitArray DecryptManager(BitArray bitArrayInput, int padding = 0)
+        public static Tuple<BitArray, ReturnType> DecryptManager(BitArray bitArrayInput, Mode mode, int padding = 0)
         {
             BitArray bitArrayOutput = ResizeBitArray(bitArrayInput, bitArrayInput.Length - padding);
-            return HammingManager(bitArrayOutput, GetTotalSize(8), GetDataSize, Decrypt);
+            return HammingManager(bitArrayOutput, mode, GetTotalSize(8), GetDataSize, Decrypt);
         }
 
-        private static BitArray ResizeBitArray(BitArray bitArray, int newArraySize, int startIndex = 0)
+        private static Tuple<BitArray, ReturnType> HammingManager(BitArray bitArrayInput, Mode mode, int magicNumber, Func<int, int> outputSize, Func<BitArray, Mode, Tuple<BitArray, ReturnType>> hamming)
         {
-            Boolean[] outputBits = new Boolean[newArraySize];
-            // Same Array
-            if (bitArray.Length == newArraySize)
-                return bitArray;
-
-            // Bigger Array
-            if (bitArray.Length < newArraySize)
-                bitArray.CopyTo(outputBits, 0);
-
-            //Smaller Array
-            else
-            {
-                Boolean[] allBits = new Boolean[bitArray.Length];
-                bitArray.CopyTo(allBits, 0);
-                Array.Copy(allBits, startIndex, outputBits, 0, newArraySize);
-            }
-
-            return new BitArray(outputBits);
-        }
-
-        private static BitArray HammingManager(BitArray bitArrayInput, int magicNumber, Func<int, int> outputSize, Func<BitArray, BitArray> hamming)
-        {
+            ReturnType returnType = ReturnType.OK;
             if (bitArrayInput.Length % magicNumber != 0)
                 throw new ArgumentException("BitArray size must be multiple of " + magicNumber);
 
@@ -56,23 +46,23 @@ namespace TransmissionSimulation.Helpers
             for (int i = 0; i < bitArrayInput.Length / magicNumber; i++)
             {
                 // Create a new BitArray of size magicNumber
-                Boolean[] allBits = new Boolean[bitArrayInput.Length];
-                Boolean[] bits = new Boolean[magicNumber];
-                bitArrayInput.CopyTo(allBits, 0);
-                Array.Copy(allBits, i * magicNumber, bits, 0, magicNumber);
-
-                BitArray tmpBitArray = new BitArray(bits);
+                BitArray subBitsArray = ResizeBitArray(bitArrayInput, magicNumber, i * magicNumber);
 
                 // Encrypt/Decrypt it
-                tmpBitArray = hamming(tmpBitArray);
-                // Add the output to the arrayOutput
-                tmpBitArray.CopyTo(arrayOuput, i * tmpBitArray.Length);
+                Tuple<BitArray, ReturnType> tuple = hamming(subBitsArray, mode);
+
+                // Get the returnType
+                if (tuple.Item2 > returnType)
+                    returnType = tuple.Item2;
+
+                // Add the output (part i) to the arrayOutput
+                tuple.Item1.CopyTo(arrayOuput, i * tuple.Item1.Length);
             }
 
-            return new BitArray(arrayOuput);
+            return Tuple.Create(new BitArray(arrayOuput), returnType);
         }
 
-        private static BitArray Encrypt(BitArray bitArrayInput)
+        private static Tuple<BitArray, ReturnType> Encrypt(BitArray bitArrayInput, Mode mode)
         {
             int indiceInput = 0;
 
@@ -109,12 +99,13 @@ namespace TransmissionSimulation.Helpers
             // Write 1 for odd and 0 for even
             bitArrayOutput[0] = (masterParityCount & 1) == 1;
             
-            return bitArrayOutput;
+            return Tuple.Create(bitArrayOutput, ReturnType.OK);
         }
 
-        private static BitArray Decrypt(BitArray bitArrayInput)
+        private static Tuple<BitArray, ReturnType> Decrypt(BitArray bitArrayInput, Mode mode)
         {
             int errorSyndrome = 0;
+            int masterParityCount = 0;
 
             // Check the bit of controle (power of 2) to verify integrity
             for (int i = 1; i < bitArrayInput.Length; i++)
@@ -130,16 +121,44 @@ namespace TransmissionSimulation.Helpers
                         errorSyndrome += i;
                     }
                 }
+
+                if (bitArrayInput[i])
+                    masterParityCount++;
             }
 
-            // TODO
-            // Correct the error, if there is one ...
-            if (errorSyndrome != 0)
+            //masterParityCount : 1 for odd and 0 for even
+            bool isMasterParityCorrect = ((masterParityCount & 1) == 1) == bitArrayInput[0];
+            ReturnType returnType = ReturnType.OK;
+
+            //DETECT (all mode)
+            // 2 bit detection -> there is an errorSyndrome and masterParityCount is correct
+            if (errorSyndrome != 0 && isMasterParityCorrect)
             {
-                bitArrayInput[errorSyndrome] = !bitArrayInput[errorSyndrome];
-                throw new Exception("Error Corrected !!! :)");
+                returnType = ReturnType.DETECTED;
             }
-            
+
+            // CORRECT
+            // 1 bit error -> there is an errorSyndrome and masterParityCount is wrong
+            else if (errorSyndrome != 0 && !isMasterParityCorrect)
+            {
+                if (mode == Mode.CORRECT)
+                {
+                    // The error to correct is at errorSyndrome index
+                    // If the errorSyndrome is valid, correct the value in question
+                    if (errorSyndrome < bitArrayInput.Length)
+                    {
+                        bitArrayInput[errorSyndrome] = !bitArrayInput[errorSyndrome];
+                        returnType = ReturnType.CORRECTED;
+                    }
+                    // Else, there is 3 errors or more that we can detect in the bitArray, don't correct it
+                    else
+                    {
+                        returnType = ReturnType.DETECTED;
+                    }
+                }
+            }
+            //Assumption: The probability of >= 3 bits being in error negligible.
+
             BitArray bitArrayOutput = new BitArray(GetDataSize(bitArrayInput.Length));
             int indiceOutput = 0;
 
@@ -153,7 +172,7 @@ namespace TransmissionSimulation.Helpers
                 }
             }
 
-            return bitArrayOutput;
+            return Tuple.Create(bitArrayOutput, returnType);
         }
 
         /// <summary>
@@ -231,6 +250,28 @@ namespace TransmissionSimulation.Helpers
             }
 
             return parityCount;
+        }
+
+        private static BitArray ResizeBitArray(BitArray bitArray, int newArraySize, int startIndex = 0)
+        {
+            Boolean[] outputBits = new Boolean[newArraySize];
+            // Same Array
+            if (bitArray.Length == newArraySize)
+                return bitArray;
+
+            // Bigger Array
+            if (bitArray.Length < newArraySize)
+                bitArray.CopyTo(outputBits, 0);
+
+            //Smaller Array
+            else
+            {
+                Boolean[] allBits = new Boolean[bitArray.Length];
+                bitArray.CopyTo(allBits, 0);
+                Array.Copy(allBits, startIndex, outputBits, 0, newArraySize);
+            }
+
+            return new BitArray(outputBits);
         }
     }
 }

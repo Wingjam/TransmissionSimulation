@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TransmissionSimulation.Helpers;
 
@@ -18,8 +19,8 @@ namespace TransmissionSimulationTests.Helpers
                 [6] = true
             };
 
-            BitArray bitArrayEncrypt = HammingHelper.EncryptManager(bitArray);
-            BitArray bitArrayDecrypt = HammingHelper.DecryptManager(bitArrayEncrypt);
+            BitArray bitArrayEncrypt = HammingHelper.EncryptManager(bitArray, HammingHelper.Mode.CORRECT).Item1;
+            BitArray bitArrayDecrypt = HammingHelper.DecryptManager(bitArrayEncrypt, HammingHelper.Mode.CORRECT).Item1;
 
             Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArray), HammingHelper.BitArrayToDigitString(bitArrayDecrypt));
 
@@ -34,11 +35,82 @@ namespace TransmissionSimulationTests.Helpers
                 [20] = true,
                 [29] = true,
             };
+            
+            Tuple<BitArray,HammingHelper.ReturnType> tupleEncrypt = HammingHelper.EncryptManager(bitArray, HammingHelper.Mode.CORRECT);
+            Tuple<BitArray,HammingHelper.ReturnType> tupleDecrypt = HammingHelper.DecryptManager(tupleEncrypt.Item1, HammingHelper.Mode.CORRECT);
 
-            bitArrayEncrypt = HammingHelper.EncryptManager(bitArray);
-            bitArrayDecrypt = HammingHelper.DecryptManager(bitArrayEncrypt);
+            Assert.AreEqual(HammingHelper.ReturnType.OK, tupleEncrypt.Item2);
+            Assert.AreEqual(HammingHelper.ReturnType.OK, tupleDecrypt.Item2);
+            Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArray), HammingHelper.BitArrayToDigitString(tupleDecrypt.Item1));
 
-            Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArray), HammingHelper.BitArrayToDigitString(bitArrayDecrypt));
+            // # Random case with 1 error (CORRECTED)
+            bitArray = new BitArray(8)
+            {
+                [0] = true,
+                [3] = true,
+                [5] = true,
+            };
+
+            tupleEncrypt = HammingHelper.EncryptManager(bitArray, HammingHelper.Mode.CORRECT);
+            tupleEncrypt.Item1[9] = !tupleEncrypt.Item1[9]; // Inject error here
+            tupleDecrypt = HammingHelper.DecryptManager(tupleEncrypt.Item1, HammingHelper.Mode.CORRECT);
+
+            Assert.AreEqual(HammingHelper.ReturnType.OK, tupleEncrypt.Item2);
+            Assert.AreEqual(HammingHelper.ReturnType.CORRECTED, tupleDecrypt.Item2);
+            Assert.AreEqual(HammingHelper.BitArrayToDigitString(bitArray), HammingHelper.BitArrayToDigitString(tupleDecrypt.Item1));
+
+
+            // # Random case with 2 error (DETECTED)
+            bitArray = new BitArray(8)
+            {
+                [0] = true,
+                [3] = true,
+                [5] = true,
+            };
+
+            tupleEncrypt = HammingHelper.EncryptManager(bitArray, HammingHelper.Mode.DETECT);
+            tupleEncrypt.Item1[1] = !tupleEncrypt.Item1[1]; // Inject error here
+            tupleEncrypt.Item1[9] = !tupleEncrypt.Item1[9]; // Inject error here
+            tupleDecrypt = HammingHelper.DecryptManager(tupleEncrypt.Item1, HammingHelper.Mode.DETECT);
+
+            Assert.AreEqual(HammingHelper.ReturnType.OK, tupleEncrypt.Item2);
+            Assert.AreEqual(HammingHelper.ReturnType.DETECTED, tupleDecrypt.Item2);
+
+            // # Random case with 3 error (1 CORRECTED and 2 DETECTED)
+            bitArray = new BitArray(16)
+            {
+                [0] = true,
+                [1] = true,
+                [5] = true,
+                [7] = true,
+                [13] = true,
+            };
+
+            tupleEncrypt = HammingHelper.EncryptManager(bitArray, HammingHelper.Mode.CORRECT);
+            tupleEncrypt.Item1[1] = !tupleEncrypt.Item1[1]; // Inject error here (first 13 bits)
+            tupleEncrypt.Item1[20] = !tupleEncrypt.Item1[20]; // Inject error here (second 13 bits)
+            tupleEncrypt.Item1[25] = !tupleEncrypt.Item1[25]; // Inject error here (second 13 bits)
+            tupleDecrypt = HammingHelper.DecryptManager(tupleEncrypt.Item1, HammingHelper.Mode.CORRECT);
+
+            Assert.AreEqual(HammingHelper.ReturnType.OK, tupleEncrypt.Item2);
+            Assert.AreEqual(HammingHelper.ReturnType.DETECTED, tupleDecrypt.Item2);
+
+            // # Random case with 3 error (NOT SUPPORTED)
+            bitArray = new BitArray(8)
+            {
+                [0] = true,
+                [1] = true,
+                [5] = true,
+            };
+
+            tupleEncrypt = HammingHelper.EncryptManager(bitArray, HammingHelper.Mode.CORRECT);
+            tupleEncrypt.Item1[1] = !tupleEncrypt.Item1[1]; // Inject error here
+            tupleEncrypt.Item1[5] = !tupleEncrypt.Item1[5]; // Inject error here
+            tupleEncrypt.Item1[9] = !tupleEncrypt.Item1[9]; // Inject error here
+            tupleDecrypt = HammingHelper.DecryptManager(tupleEncrypt.Item1, HammingHelper.Mode.CORRECT);
+
+            Assert.AreEqual(HammingHelper.ReturnType.OK, tupleEncrypt.Item2);
+            Assert.AreEqual(HammingHelper.ReturnType.DETECTED, tupleDecrypt.Item2);
 
         }
 
