@@ -64,6 +64,11 @@ namespace TransmissionSimulation.Components
         int TimeoutInMs { get; set; }
 
         /// <summary>
+        /// Indicates whether we try to correct or detect errors.
+        /// </summary>
+        HammingHelper.Mode CorrectionMode { get; set; }
+
+        /// <summary>
         /// Boolean that stops the execution of the Station
         /// </summary>
         bool StopExecution { get; set; }
@@ -184,6 +189,7 @@ namespace TransmissionSimulation.Components
             ITransmitter transmitter,
             int bufferSize,
             int timeoutInMs,
+            bool detectionOnly,
             FileStream inputFileStream,
             FileStream outputFileStream,
             Constants.ShowFrameDelegate sendFrame)
@@ -194,6 +200,7 @@ namespace TransmissionSimulation.Components
             InputBuffer = new Dictionary<int, Frame>();
             OutputBuffer = new Dictionary<int, Frame>();
             this.TimeoutInMs = timeoutInMs;
+            this.CorrectionMode = detectionOnly ? HammingHelper.Mode.DETECT : HammingHelper.Mode.CORRECT;
             this.inputFileStream = inputFileStream;
             this.outputFileStream = outputFileStream;
             this.sendFrameDelegate = sendFrame;
@@ -553,7 +560,7 @@ namespace TransmissionSimulation.Components
         {
             // Prepare the frame to be sent on the wire (converts to BitArray and encode for error control with Hamming)
             BitArray frameBitArray = frame.GetFrameAsByteArray();
-            Tuple<BitArray, HammingHelper.ReturnType> tuple = HammingHelper.EncryptManager(frameBitArray, HammingHelper.Mode.CORRECT, EncodedFramePadding);
+            Tuple<BitArray, HammingHelper.ReturnType> tuple = HammingHelper.EncryptManager(frameBitArray, CorrectionMode, EncodedFramePadding);
             BitArray encodedFrameBitArray = tuple.Item1;
 
             // Notify subscriber that frame is being sent
@@ -577,8 +584,11 @@ namespace TransmissionSimulation.Components
                 BitArray encodedFrameBitArray = transmitter.GetData(StationId);
                 
                 // Decode the frame
-                Tuple<BitArray, HammingHelper.ReturnType> tuple = HammingHelper.DecryptManager(encodedFrameBitArray, HammingHelper.Mode.CORRECT, EncodedFramePadding);
+                Tuple<BitArray, HammingHelper.ReturnType> tuple = HammingHelper.DecryptManager(encodedFrameBitArray, CorrectionMode, EncodedFramePadding);
                 BitArray frameBitArray = tuple.Item1;
+                
+                // Keeps the current return type as the last received ones
+                ReturnTypeOfLastReceivedFrame = tuple.Item2;
 
                 bool isCorrupted = tuple.Item2 == HammingHelper.ReturnType.DETECTED;
                 if (isCorrupted)
@@ -588,9 +598,6 @@ namespace TransmissionSimulation.Components
 
                 // Converts BitArray to Frame
                 Frame frame = Frame.GetFrameFromBitArray(frameBitArray);
-
-                // Keeps the current return type as the last received ones
-                ReturnTypeOfLastReceivedFrame = tuple.Item2;
 
                 Console.WriteLine("{5, 11} {0, 12} : id={1, 2}, type={2, 4}, ack={3, 2}, data lenght={4, 3}={6, 3}", "ReceiveFrame", frame.Id, frame.Type.ToString(), frame.Ack, frame.Data.Count / 8, StationId == Constants.StationId.Station1 ? "Station 1" : "Station 2", frame.DataSize);
 

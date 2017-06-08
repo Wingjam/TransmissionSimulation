@@ -71,8 +71,8 @@ namespace TransmissionSimulation
             //Start the threads
             cable = new Transmitter();
 
-            Station station1 = new Station(Constants.StationId.Station1, cable, station1Parameters.BufferSize, station1Parameters.Timeout, sourceFile1, destinationFile1, ShowFrame);
-            Station station2 = new Station(Constants.StationId.Station2, cable, station2Parameters.BufferSize, station2Parameters.Timeout, sourceFile2, destinationFile2, ShowFrame);
+            Station station1 = new Station(Constants.StationId.Station1, cable, station1Parameters.BufferSize, station1Parameters.Timeout, station1Parameters.DetectionOnly, sourceFile1, destinationFile1, ShowFrame);
+            Station station2 = new Station(Constants.StationId.Station2, cable, station2Parameters.BufferSize, station2Parameters.Timeout, station2Parameters.DetectionOnly, sourceFile2, destinationFile2, ShowFrame);
 
             sendThread = new Thread(station1.Start);
             receiveThread = new Thread(station2.Start);
