@@ -168,6 +168,9 @@ namespace TransmissionSimulation.Components
         /// <param name="endIndex">Position in data bitarray to end error insertion (excluded)</param>
         public void InsertRandomErrors(int errorCount, int startIndex, int endIndex)
         {
+            if (startIndex > endIndex)
+                throw new FormatException("Start index must not be greater than end index.");
+
             if (errorCount >= 0 && startIndex >= 0 && endIndex >= 0)
                 nextRandomError = new Tuple<int, Tuple<int, int>>(errorCount, new Tuple<int, int>(startIndex, endIndex));
             else
