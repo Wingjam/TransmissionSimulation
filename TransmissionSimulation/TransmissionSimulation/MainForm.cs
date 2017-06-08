@@ -103,8 +103,23 @@ namespace TransmissionSimulation
             }
             else
             {
-                OnAppend(frameToShow.ToString(), textBox);
-                OnAppend(Environment.NewLine, textBox);
+
+                OnAppend(frameToShow.Id.ToString("000") + " | ", textBox, DefaultForeColor);
+                switch (frameToShow.Type)
+                {
+                    case Constants.FrameType.Ack:
+                        OnAppend("Ack ", textBox, Color.DarkGreen);
+                        break;
+                    case Constants.FrameType.Nak:
+                        OnAppend("Nak ", textBox, Color.DarkRed);
+                        break;
+                    case Constants.FrameType.Data:
+                        OnAppend("Data", textBox, DefaultForeColor);
+                        break;
+                }
+                OnAppend(" | " + frameToShow.Ack.ToString("00"), textBox, DefaultForeColor);
+                OnAppend(" | " + frameToShow.DataSize.ToString("000"), textBox, DefaultForeColor);
+                OnAppend(Environment.NewLine, textBox, DefaultForeColor);
             }
             //TODO voir avec félix pour avoir un niveau de progression
             //On doit prendre le size initiale du fichier, et faire une proportion avec la taille de chaque trame
@@ -118,7 +133,7 @@ namespace TransmissionSimulation
         const int WM_USER = 0x400;
         const int EM_HIDESELECTION = WM_USER + 63;
 
-        void OnAppend(string text, RichTextBox textBox)
+        void OnAppend(string text, RichTextBox textBox, Color textColor)
         {
             bool focused = textBox.Focused;
             //backup initial selection
@@ -138,7 +153,9 @@ namespace TransmissionSimulation
                 SendMessage(textBox.Handle, EM_HIDESELECTION, 1, 0);
             }
 
+            textBox.SelectionColor = textColor;
             textBox.AppendText(text);
+            textBox.SelectionColor = textBox.ForeColor;
 
             if (!autoscroll)
             {
