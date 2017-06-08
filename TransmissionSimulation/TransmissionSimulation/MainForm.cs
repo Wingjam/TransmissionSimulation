@@ -186,7 +186,6 @@ namespace TransmissionSimulation
             {
                 for (int i = (int)numErrorCorrectible.Value; i > 0; --i)
                 {
-                    Console.WriteLine("##########################################{0}#######{1}###", errorNumber * numberOfBit, (errorNumber + 1) * numberOfBit);
                     cable.InsertRandomErrors(1, errorNumber * numberOfBit, (errorNumber + 1) * numberOfBit);
                     ++errorNumber;
                 }

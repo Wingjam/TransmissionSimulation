@@ -140,19 +140,8 @@ namespace TransmissionSimulationTests.Helpers
                         {
                             continue;
                         }
-                        // # Random case with 1 (Detect only 1 bit)
-                        //bitArray = new BitArray(8)
-                        //{
-                        //    [0] = true,
-                        //    [1] = true,
-                        //    [5] = true,
-                        //};
-                        byte[] bytes = BitConverter.GetBytes(i);
-                        for (int x = 0; x < 8; ++x)
-                        {
-                            
-                        }
-                        bitArray = new BitArray(bytes);
+                        byte[] bytes = BitConverter.GetBytes(num);
+                        bitArray = new BitArray(new byte[]{bytes[0]});
 
                         tupleEncrypt = HammingHelper.EncryptManager(bitArray, HammingHelper.Mode.CORRECT);
                         tupleEncrypt.Item1[j] = !tupleEncrypt.Item1[j]; // Inject error here
