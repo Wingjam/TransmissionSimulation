@@ -54,6 +54,9 @@ namespace TransmissionSimulation
             // Open source files in read mode
             FileStream sourceFile1 = File.Open(station1Parameters.SourceFilePath, FileMode.Open, FileAccess.Read);
             FileStream sourceFile2 = File.Open(station2Parameters.SourceFilePath, FileMode.Open, FileAccess.Read);
+            //We get the file size for the progress bar.
+            transfertBar.Maximum = (int)sourceFile1.Length;
+
 
             // Open destination file in write mode
             FileStream destinationFile1 = File.Open(station1Parameters.DestinationFilePath, FileMode.OpenOrCreate, FileAccess.Write);
@@ -97,6 +100,7 @@ namespace TransmissionSimulation
             bool isSent = frameEvent == Constants.FrameEvent.FrameSent;
 
             //based on msdn doc: https://msdn.microsoft.com/en-us/library/ms171728(v=vs.110).aspx
+            //Thread safe call to richtextbox
             RichTextBox textBox = isSent ? txtDataSend : txtReception;
             if (textBox.InvokeRequired)
             {
@@ -105,7 +109,6 @@ namespace TransmissionSimulation
             }
             else
             {
-
                 OnAppend(frameToShow.Id.ToString("000") + " | ", textBox, DefaultForeColor);
                 switch (frameToShow.Type)
                 {
@@ -122,9 +125,19 @@ namespace TransmissionSimulation
                 OnAppend(" | " + frameToShow.Ack.ToString("00"), textBox, DefaultForeColor);
                 OnAppend(" | " + frameToShow.DataSize.ToString("000"), textBox, DefaultForeColor);
                 OnAppend(Environment.NewLine, textBox, DefaultForeColor);
+
+                //Updating the progress bar.
+                if (stationId == Constants.StationId.Station2 && (frameEvent == Constants.FrameEvent.FrameReceivedOk ||
+                                                                  frameEvent == Constants.FrameEvent.FrameReceivedCorrected))
+                {
+                    transfertBar.Value += (int)frameToShow.DataSize;
+                    if (transfertBar.Value == transfertBar.Maximum)
+                    {
+                        MessageBox.Show(this, "Tranfert complété!");
+                        //TODO fermer le programme correctement
+                    }
+                }
             }
-            //TODO voir avec félix pour avoir un niveau de progression
-            //On doit prendre le size initiale du fichier, et faire une proportion avec la taille de chaque trame
         }
 
         //Prevent autoscroll in richtextbox
