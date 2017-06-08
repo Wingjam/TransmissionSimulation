@@ -10,6 +10,7 @@ namespace TransmissionSimulation.Components
     public class Transmitter : ITransmitter
     {
         private static Mutex mutex = new Mutex();
+        private static Random random;
         private BitArray sendingStation1;
         private BitArray sendingStation2;
         private BitArray receivingStation2;
@@ -77,6 +78,7 @@ namespace TransmissionSimulation.Components
             readyToSendStation2 = true;
             dataReceivedStation1 = false;
             nextRandomError = null;
+            random = new Random();
             IndicesInversions = new List<int>();
         }
 
@@ -151,7 +153,7 @@ namespace TransmissionSimulation.Components
 
             for (int i = 0; i < nextRandomError.Item1; ++i)
             {
-                int pos = new Random().Next(nextRandomError.Item2.Item1, endIndex);
+                int pos = random.Next(nextRandomError.Item2.Item1, endIndex);
                 transferData[pos] = !transferData[pos];
             }
 
