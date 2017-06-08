@@ -47,5 +47,30 @@ namespace TransmissionSimulationTests.Components
             var dataStation2 = t.GetData(Constants.StationId.Station2);
             Assert.IsTrue(t.TransmitterReady(Constants.StationId.Station1));
         }
+
+        [TestMethod]
+        public void When_random_errors_are_injected_Then_frame_is_altered()
+        {
+            t.InsertRandomErrors(1, 1, 3);
+            Assert.IsTrue(t.TransmitterReady(Constants.StationId.Station1));
+            t.SendData(data, Constants.StationId.Station1);
+            Thread.Sleep(Constants.DefaultDelay * 200);
+            var dataStation2 = t.GetData(Constants.StationId.Station2);
+            Assert.IsTrue(data == dataStation2);
+            Assert.IsTrue(dataStation2[1] || dataStation2[2]);
+        }
+
+        [TestMethod]
+        public void When_fixed_errors_are_injected_Then_frame_is_correctly_altered()
+        {
+            t.IndicesInversions.Add(1);
+            t.IndicesInversions.Add(2);
+            Assert.IsTrue(t.TransmitterReady(Constants.StationId.Station1));
+            t.SendData(data, Constants.StationId.Station1);
+            Thread.Sleep(Constants.DefaultDelay * 200);
+            var dataStation2 = t.GetData(Constants.StationId.Station2);
+            Assert.IsTrue(data == dataStation2);
+            Assert.IsTrue(dataStation2[1] && dataStation2[2]);
+        }
     }
 }

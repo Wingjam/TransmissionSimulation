@@ -130,7 +130,7 @@ namespace TransmissionSimulation.Components
             {
                 foreach(var i in IndicesInversions)
                 {
-                    if (i < IndicesInversions.Count)
+                    if (i < transferData.Count)
                         transferData[(int)i] = !transferData[(int)i];
                 }
             }
