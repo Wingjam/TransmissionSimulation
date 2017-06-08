@@ -151,7 +151,8 @@ namespace TransmissionSimulation.Components
         /// <param name="transferData">Data to insert errors into.</param>
         private BitArray InjectErrorsRandomly(BitArray transferData)
         {
-            int endIndex = (nextRandomError.Item2.Item2 > transferData.Length) ? transferData.Length : nextRandomError.Item2.Item2;
+            int dataLength = transferData.Length;
+            int endIndex = (nextRandomError.Item2.Item2 > dataLength) ? dataLength : nextRandomError.Item2.Item2;
             int startIndex = nextRandomError.Item2.Item1;
             List<int> listIndex = new List<int>();
 
@@ -171,7 +172,7 @@ namespace TransmissionSimulation.Components
 
             foreach(int pos in listIndex)
             {
-                transferData[pos] = !transferData[pos];
+                transferData[dataLength - 1 - pos] = !transferData[dataLength - 1 - pos];
             }
 
             nextRandomError = null;
