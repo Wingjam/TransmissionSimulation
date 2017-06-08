@@ -326,7 +326,7 @@ namespace TransmissionSimulation.Components
                     if (frameReceived == null)
                     {
                         // Notify subscriber that frame is being received, but it is corrupted
-                        sendFrameDelegate(frameReceived, Constants.FrameEvent.FrameReceivedCorrupted, StationId);
+                        sendFrameDelegate(new Frame(UInt16.MaxValue, Constants.FrameType.Data, UInt16.MaxValue, new BitArray(0), 0), Constants.FrameEvent.FrameReceivedCorrupted, StationId);
 
                         // The frame was corrupted, we prepare a NAK, but only if we have not sent another one already
                         if (NoNakSentForNextAwaitedFrame)
