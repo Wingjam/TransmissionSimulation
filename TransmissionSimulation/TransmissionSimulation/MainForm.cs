@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using TransmissionSimulation.Components;
+using TransmissionSimulation.Helpers;
 using TransmissionSimulation.Models;
 using TransmissionSimulation.Ressources;
 
@@ -18,8 +19,6 @@ namespace TransmissionSimulation
 {
     public partial class MainForm : Form
     {
-        private bool envoie;
-        private bool envoie2;
         private StationParameters station1Parameters;
         private StationParameters station2Parameters;
         private Station station1;
@@ -34,8 +33,6 @@ namespace TransmissionSimulation
         {
             this.station1Parameters = station1Parameters;
             this.station2Parameters = station2Parameters;
-            envoie = true;
-            envoie2 = true;
             InitializeComponent();
         }
 
@@ -92,17 +89,12 @@ namespace TransmissionSimulation
 
         private void btnInject_Click(object sender, EventArgs e)
         {
-            if (envoie)
+            foreach (NumericUpDown errorPosition in errorsPositions)
             {
-                foreach (NumericUpDown errorPosition in errorsPositions)
+                if (errorPosition.Validate() && errorPosition.Value != -1)
                 {
-                    if (errorPosition.Validate() && errorPosition.Value != -1)
-                    {
-                        cable.IndicesInversions.Add((int)errorPosition.Value);
-                    }
+                    cable.IndicesInversions.Add((int)errorPosition.Value);
                 }
-                timerEnvoie.Start();
-                //envoie2 = false;
             }
         }
 
@@ -188,35 +180,32 @@ namespace TransmissionSimulation
 
         private void btnInjectTypeError_Click(object sender, EventArgs e)
         {
-            if (envoie2)
+            int errorNumber = 13;
+            int numberOfBit = HammingHelper.HammingDataSplitNumber +
+                               HammingHelper.GetTotalSize(HammingHelper.HammingDataSplitNumber);
+            if (numErrorCorrectible.Validate())
             {
-                int errorNumber = 0;
-                if (numErrorCorrectible.Validate())
+                for (int i = (int)numErrorCorrectible.Value; i > 0; --i)
                 {
-                    for (int i = (int)numErrorCorrectible.Value; i > 0; --i)
-                    {
-                        cable.InsertRandomErrors(1, errorNumber * 13, (errorNumber + 1) * 13);
-                        ++errorNumber;
-                    }
+                    cable.InsertRandomErrors(1, errorNumber * numberOfBit, (errorNumber + 1) * numberOfBit);
+                    ++errorNumber;
                 }
-                if (numErrorDetectable.Validate())
+            }
+            if (numErrorDetectable.Validate())
+            {
+                for (int i = (int)numErrorDetectable.Value; i > 0; --i)
                 {
-                    for (int i = (int)numErrorDetectable.Value; i > 0; --i)
-                    {
-                        cable.InsertRandomErrors(2, errorNumber * 13, (errorNumber + 1) * 13);
-                        ++errorNumber;
-                    }
+                    cable.InsertRandomErrors(2, errorNumber * numberOfBit, (errorNumber + 1) * numberOfBit);
+                    ++errorNumber;
                 }
-                if (numIrrecoverable.Validate())
+            }
+            if (numIrrecoverable.Validate())
+            {
+                for (int i = (int)numIrrecoverable.Value; i > 0; --i)
                 {
-                    for (int i = (int)numIrrecoverable.Value; i > 0; --i)
-                    {
-                        cable.InsertRandomErrors(3, errorNumber * 13, (errorNumber + 1) * 13);
-                        ++errorNumber;
-                    }
+                    cable.InsertRandomErrors(3, errorNumber * numberOfBit, (errorNumber + 1) * numberOfBit);
+                    ++errorNumber;
                 }
-                timerEnvoie2.Start();
-                //envoie2 = false;
             }
         }
 
@@ -225,18 +214,6 @@ namespace TransmissionSimulation
             //Stoping the two stattion
             station1.Stop();
             station2.Stop();
-        }
-
-        private void timerEnvoie_Tick(object sender, EventArgs e)
-        {
-            timerEnvoie.Stop();
-            envoie = true;
-        }
-
-        private void timerEnvoie2_Tick(object sender, EventArgs e)
-        {
-            timerEnvoie2.Stop();
-            envoie2 = true;
         }
     }
 }

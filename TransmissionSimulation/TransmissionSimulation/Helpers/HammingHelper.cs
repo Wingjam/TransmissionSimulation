@@ -12,7 +12,7 @@ namespace TransmissionSimulation.Helpers
 {
     public static class HammingHelper
     {
-        const int HammingDataSplitNumber = 8;
+        public const int HammingDataSplitNumber = 8;
         public enum Mode
         {
             CORRECT,

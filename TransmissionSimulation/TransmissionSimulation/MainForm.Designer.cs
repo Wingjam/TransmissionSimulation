@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.transfertBar = new System.Windows.Forms.ProgressBar();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -54,8 +53,6 @@
             this.numIrrecoverable = new System.Windows.Forms.NumericUpDown();
             this.numErrorDetectable = new System.Windows.Forms.NumericUpDown();
             this.numErrorCorrectible = new System.Windows.Forms.NumericUpDown();
-            this.timerEnvoie = new System.Windows.Forms.Timer(this.components);
-            this.timerEnvoie2 = new System.Windows.Forms.Timer(this.components);
             this.groupBox1.SuspendLayout();
             this.dataSendGroup.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.posError1)).BeginInit();
@@ -291,16 +288,6 @@
             this.numErrorCorrectible.Size = new System.Drawing.Size(40, 20);
             this.numErrorCorrectible.TabIndex = 11;
             // 
-            // timerEnvoie
-            // 
-            this.timerEnvoie.Interval = 1200;
-            this.timerEnvoie.Tick += new System.EventHandler(this.timerEnvoie_Tick);
-            // 
-            // timerEnvoie2
-            // 
-            this.timerEnvoie2.Interval = 1200;
-            this.timerEnvoie2.Tick += new System.EventHandler(this.timerEnvoie2_Tick);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -362,7 +349,5 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Timer timerEnvoie;
-        private System.Windows.Forms.Timer timerEnvoie2;
     }
 }
