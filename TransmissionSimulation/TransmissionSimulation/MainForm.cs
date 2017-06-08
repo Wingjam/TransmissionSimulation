@@ -24,7 +24,7 @@ namespace TransmissionSimulation
         private Thread receiveThread;
         private Transmitter cable;
         private NumericUpDown[] errorsPositions;
-        delegate void UpdateDataDelegate(Frame frameToShow, bool isSent);
+        delegate void UpdateDataDelegate(Frame frameToShow, Constants.FrameEvent frameEvent, Constants.StationId stationId);
 
         public MainForm(StationParameters station1Parameters, StationParameters station2Parameters)
         {
@@ -68,8 +68,8 @@ namespace TransmissionSimulation
             //Start the threads
             cable = new Transmitter();
 
-            Station station1 = new Station(Constants.Station.Station1, cable, station1Parameters.BufferSize, station1Parameters.Timeout, sourceFile1, destinationFile1, ShowFrame);
-            Station station2 = new Station(Constants.Station.Station2, cable, station2Parameters.BufferSize, station2Parameters.Timeout, sourceFile2, destinationFile2, ShowFrame);
+            Station station1 = new Station(Constants.StationId.Station1, cable, station1Parameters.BufferSize, station1Parameters.Timeout, sourceFile1, destinationFile1, ShowFrame);
+            Station station2 = new Station(Constants.StationId.Station2, cable, station2Parameters.BufferSize, station2Parameters.Timeout, sourceFile2, destinationFile2, ShowFrame);
 
             sendThread = new Thread(station1.Start);
             receiveThread = new Thread(station2.Start);
@@ -92,14 +92,16 @@ namespace TransmissionSimulation
             }
         }
 
-        private void ShowFrame(Frame frameToShow, bool isSent)
+        private void ShowFrame(Frame frameToShow, Constants.FrameEvent frameEvent, Constants.StationId stationId)
         {
+            bool isSent = frameEvent == Constants.FrameEvent.FrameSent;
+
             //based on msdn doc: https://msdn.microsoft.com/en-us/library/ms171728(v=vs.110).aspx
             RichTextBox textBox = isSent ? txtDataSend : txtReception;
             if (textBox.InvokeRequired)
             {
                 UpdateDataDelegate d = ShowFrame;
-                Invoke(d, frameToShow, isSent);
+                Invoke(d, frameToShow, frameEvent, stationId);
             }
             else
             {

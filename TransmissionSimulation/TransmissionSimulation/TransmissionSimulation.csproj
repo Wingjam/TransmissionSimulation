@@ -75,12 +75,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Ressources\kappa.ico" />
-    <Content Include="test2.sent.txt">
+    <None Include="test2.sent">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="test1.sent.txt">
+    </None>
+    <None Include="test1.sent">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

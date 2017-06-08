@@ -5,9 +5,21 @@ namespace TransmissionSimulation.Ressources
 {
     public static class Constants
     {
-        public enum Station { Station1, Station2 }
+        public enum StationId { Station1, Station2 }
 
         public enum FrameType { Data, Ack, Nak }
+
+        public enum FrameEvent
+        {
+            /* Receiver event */
+            FrameReceivedCorrupted,
+            FrameReceivedNotAwaited,
+            FrameReceivedDuplicate,
+            FrameReceivedOk,
+            FrameReceivedCorrected,
+            /* Sender event */
+            FrameSent,
+        }
 
         /// <summary>
         /// Frame size in bytes
@@ -30,6 +42,6 @@ namespace TransmissionSimulation.Ressources
         public const int MaximumOfErrorToInject = 2;
 
 
-        public delegate void ShowFrameDelegate(Frame frameToShow, bool isSent);
+        public delegate void ShowFrameDelegate(Frame frameToShow, FrameEvent frameEvent, StationId stationId);
     }
 }

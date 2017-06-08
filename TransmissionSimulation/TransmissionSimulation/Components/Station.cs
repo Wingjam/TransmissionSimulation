@@ -48,9 +48,9 @@ namespace TransmissionSimulation.Components
         #region Configuration fields
 
         /// <summary>
-        /// Station identification
+        /// Station id
         /// </summary>
-        Constants.Station StationIdenfication { get; set; }
+        Constants.StationId StationId { get; set; }
 
         /// <summary>
         /// Size of the input and output buffers
@@ -163,7 +163,7 @@ namespace TransmissionSimulation.Components
         #region Constructors
 
         public Station(
-            Constants.Station stationType,
+            Constants.StationId stationType,
             ITransmitter transmitter,
             int bufferSize,
             int timeoutInMs,
@@ -171,7 +171,7 @@ namespace TransmissionSimulation.Components
             FileStream outputFileStream,
             Constants.ShowFrameDelegate sendFrame)
         {
-            this.StationIdenfication = stationType;
+            this.StationId = stationType;
             this.transmitter = transmitter;
             this.BufferSize = bufferSize;
             InputBuffer = new Dictionary<int, Frame>();
@@ -236,8 +236,8 @@ namespace TransmissionSimulation.Components
                 // - expired frame sequence number
                 // - cancel : cancel with a 
 
-                bool transmitterReady = transmitter.TransmitterReady(StationIdenfication);
-                bool transmitterDataReceived = transmitter.DataReceived(StationIdenfication);
+                bool transmitterReady = transmitter.TransmitterReady(StationId);
+                bool transmitterDataReceived = transmitter.DataReceived(StationId);
                 if (transmitterReady && HighPriorityFrames.Count > 0) // - high priority frame ready (examples : nak is ready to be sent, we need to resend a frame for which a nak was received, we need to resend a frame for which the timeout occured)
                 {
                     // Gets next high priority frame
@@ -298,6 +298,9 @@ namespace TransmissionSimulation.Components
 
                     if (frameReceived == null)
                     {
+                        // Notify subscriber that frame is being received, but it is corrupted
+                        sendFrameDelegate(frameReceived, Constants.FrameEvent.FrameReceivedCorrupted, StationId);
+
                         // The frame was corrupted, we prepare a NAK, but only if we have not sent another one already
                         if (NoNakSentForNextAwaitedFrame)
                         {
@@ -337,7 +340,20 @@ namespace TransmissionSimulation.Components
                                 if (!InputBuffer.ContainsKey(frameReceived.Id % BufferSize))
                                 {
                                     InputBuffer.Add(frameReceived.Id % BufferSize, frameReceived);
+                                    
+                                    // Notify subscriber that frame is being received and was new (so it is ok)
+                                    sendFrameDelegate(frameReceived, Constants.FrameEvent.FrameReceivedOk, StationId);
                                 }
+                                else
+                                {
+                                    // Notify subscriber that frame is being received, but is a duplicate
+                                    sendFrameDelegate(frameReceived, Constants.FrameEvent.FrameReceivedDuplicate, StationId);
+                                }
+                            }
+                            else
+                            {
+                                // Notify subscriber that frame is being received, but is not in a frame that was awaited currently.
+                                sendFrameDelegate(frameReceived, Constants.FrameEvent.FrameReceivedNotAwaited, StationId);
                             }
 
                             // Try to pass data to the superior layer (in the fileStream) if we have the next ordered frames
@@ -503,12 +519,12 @@ namespace TransmissionSimulation.Components
             BitArray encodedFrameBitArray = tuple.Item1;
 
             // Notify subscriber that frame is being sent
-            sendFrameDelegate(frame, true);
+            sendFrameDelegate(frame, Constants.FrameEvent.FrameSent, StationId);
 
-            Console.WriteLine("{5, 11} {0, 12} : id={1, 2}, type={2, 4}, ack={3, 2}, data lenght={4, 3}={6, 3}", "SendFrame", frame.Id, frame.Type.ToString(), frame.Ack, frame.Data.Count / 8, StationIdenfication == Constants.Station.Station1 ? "Station 1" : "Station 2", frame.DataSize);
+            Console.WriteLine("{5, 11} {0, 12} : id={1, 2}, type={2, 4}, ack={3, 2}, data lenght={4, 3}={6, 3}", "SendFrame", frame.Id, frame.Type.ToString(), frame.Ack, frame.Data.Count / 8, StationId == Constants.StationId.Station1 ? "Station 1" : "Station 2", frame.DataSize);
 
             // Send the data
-            transmitter.SendData(encodedFrameBitArray, StationIdenfication);
+            transmitter.SendData(encodedFrameBitArray, StationId);
         }
 
         /// <summary>
@@ -517,10 +533,10 @@ namespace TransmissionSimulation.Components
         /// <returns>The decoded Frame. Null if Frame was corrupted or there was no data in the transmitter.</returns>
         private Frame GetReceivedFrame()
         {
-            if (transmitter.DataReceived(StationIdenfication))
+            if (transmitter.DataReceived(StationId))
             {
                 // there is indeed a data, we are going to get it
-                BitArray encodedFrameBitArray = transmitter.GetData(StationIdenfication);
+                BitArray encodedFrameBitArray = transmitter.GetData(StationId);
 
                 // ****************************************************
                 // TODO Check if data is corrupted (NEED JONATHAN TO ADD A SERVICE TO ITS HAMMING HELPER)
@@ -538,10 +554,7 @@ namespace TransmissionSimulation.Components
                 // Converts BitArray to Frame
                 Frame frame = Frame.GetFrameFromBitArray(frameBitArray);
 
-                // Notify subscriber that frame is being received
-                sendFrameDelegate(frame, false);
-
-                Console.WriteLine("{5, 11} {0, 12} : id={1, 2}, type={2, 4}, ack={3, 2}, data lenght={4, 3}={6, 3}", "ReceiveFrame", frame.Id, frame.Type.ToString(), frame.Ack, frame.Data.Count / 8, StationIdenfication == Constants.Station.Station1 ? "Station 1" : "Station 2", frame.DataSize);
+                Console.WriteLine("{5, 11} {0, 12} : id={1, 2}, type={2, 4}, ack={3, 2}, data lenght={4, 3}={6, 3}", "ReceiveFrame", frame.Id, frame.Type.ToString(), frame.Ack, frame.Data.Count / 8, StationId == Constants.StationId.Station1 ? "Station 1" : "Station 2", frame.DataSize);
 
                 return frame;
             }

@@ -5,10 +5,10 @@ namespace TransmissionSimulation.Components
 {
     public interface ITransmitter
     {
-        bool TransmitterReady(Constants.Station station);
-        void SendData(BitArray data, Constants.Station station);
-        bool DataReceived(Constants.Station station);
-        BitArray GetData(Constants.Station station);
+        bool TransmitterReady(Constants.StationId station);
+        void SendData(BitArray data, Constants.StationId station);
+        bool DataReceived(Constants.StationId station);
+        BitArray GetData(Constants.StationId station);
         void InsertRandomErrors(int errorCount, int startIndex, int endIndex);
     }
 }

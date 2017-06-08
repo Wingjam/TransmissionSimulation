@@ -182,9 +182,9 @@ namespace TransmissionSimulation.Components
         /// </summary>
         /// <returns><c>true</c>, if transmitter ready is ready for the station, <c>false</c> otherwise.</returns>
         /// <param name="station">Station to check for transmitter ready.</param>
-        public bool TransmitterReady(Constants.Station station)
+        public bool TransmitterReady(Constants.StationId station)
         {
-            return (station == Constants.Station.Station1) ? ReadyToSendStation1 && !DataReceivedStation2 : ReadyToSendStation2 && !DataReceivedStation1;
+            return (station == Constants.StationId.Station1) ? ReadyToSendStation1 && !DataReceivedStation2 : ReadyToSendStation2 && !DataReceivedStation1;
         }
 
         /// <summary>
@@ -192,9 +192,9 @@ namespace TransmissionSimulation.Components
         /// </summary>
         /// <returns><c>true</c>, if data was received, <c>false</c> otherwise.</returns>
         /// <param name="station">Station that checks for data received.</param>
-        public bool DataReceived(Constants.Station station)
+        public bool DataReceived(Constants.StationId station)
         {
-            return (station == Constants.Station.Station1) ? DataReceivedStation1 : DataReceivedStation2;
+            return (station == Constants.StationId.Station1) ? DataReceivedStation1 : DataReceivedStation2;
         }
 
         /// <summary>
@@ -202,16 +202,16 @@ namespace TransmissionSimulation.Components
         /// </summary>
         /// <param name="data">Data to send.</param>
         /// <param name="station">Station to send data from.</param>
-        public void SendData(BitArray data, Constants.Station station)
+        public void SendData(BitArray data, Constants.StationId station)
         {
             mutex.WaitOne();
 
-            if (station == Constants.Station.Station1 && !DataReceivedStation2)
+            if (station == Constants.StationId.Station1 && !DataReceivedStation2)
             {
                 sendingStation1 = data;
                 ReadyToSendStation1 = false;
             }
-            else if (station == Constants.Station.Station2 && !DataReceivedStation1)
+            else if (station == Constants.StationId.Station2 && !DataReceivedStation1)
             {
                 sendingStation2 = data;
                 ReadyToSendStation2 = false;
@@ -229,7 +229,7 @@ namespace TransmissionSimulation.Components
         /// </summary>
         /// <returns>The data received.</returns>
         /// <param name="station">Station that gets available data.</param>
-        public BitArray GetData(Constants.Station station)
+        public BitArray GetData(Constants.StationId station)
         {
             mutex.WaitOne();
 
@@ -237,7 +237,7 @@ namespace TransmissionSimulation.Components
 
             if (DataReceived(station))
             {
-                if (station == Constants.Station.Station1)
+                if (station == Constants.StationId.Station1)
                 {
                     data = receivingStation1;
 					DataReceivedStation1 = false;

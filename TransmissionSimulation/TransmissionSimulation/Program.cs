@@ -25,15 +25,15 @@ namespace TransmissionSimulation
                 station1Parameters.BufferSize = Convert.ToInt32(appSettings.Get("BufferSize1") ?? "10");
                 station1Parameters.Timeout = Convert.ToInt32(appSettings.Get("Timeout1") ?? "5000");
                 station1Parameters.DetectionOnly = Convert.ToInt32(appSettings.Get("DetectionOnly1") ?? "0") == 1;
-                station1Parameters.SourceFilePath = appSettings.Get("SourceFile1") ?? "test1.sent.txt";
-                station1Parameters.DestinationFilePath = appSettings.Get("DestinationFile1") ?? "test1.received.txt";
+                station1Parameters.SourceFilePath = appSettings.Get("SourceFile1") ?? "test1.sent";
+                station1Parameters.DestinationFilePath = appSettings.Get("DestinationFile1") ?? "test1.received";
 
                 // Station 2 parameters read
                 station2Parameters.BufferSize = Convert.ToInt32(appSettings.Get("BufferSize2") ?? "10");
                 station2Parameters.Timeout = Convert.ToInt32(appSettings.Get("Timeout2") ?? "5000");
                 station2Parameters.DetectionOnly = Convert.ToInt32(appSettings.Get("DetectionOnly2") ?? "0") == 1;
-                station2Parameters.SourceFilePath = appSettings.Get("SourceFile2") ?? "test2.sent.txt";
-                station2Parameters.DestinationFilePath = appSettings.Get("DestinationFile2") ?? "test2.received.txt";
+                station2Parameters.SourceFilePath = appSettings.Get("SourceFile2") ?? "test2.sent";
+                station2Parameters.DestinationFilePath = appSettings.Get("DestinationFile2") ?? "test2.received";
 
                 Console.WriteLine("AppSettings correctly read.");
             }
