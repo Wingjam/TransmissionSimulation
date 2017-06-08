@@ -44,6 +44,9 @@ namespace TransmissionSimulation
                 errorPosition.Minimum = -1;
                 errorPosition.Value = -1;
             }
+            numErrorCorrectible.Maximum = Constants.FrameSize * 8 / 13;
+            numErrorDetectable.Maximum = Constants.FrameSize * 8 / 13;
+            numIrrecoverable.Maximum = Constants.FrameSize * 8 / 13;
 
             FileStream fileToCopie = File.Open(progOption.FileToCopie, FileMode.Open, FileAccess.Read);
             FileStream destinationFile = File.Open(progOption.DestinationFile, FileMode.OpenOrCreate, FileAccess.Write);
@@ -133,6 +136,35 @@ namespace TransmissionSimulation
                 if (focused)
                 {
                     textBox.Focus();
+                }
+            }
+        }
+
+        private void btnInjectTypeError_Click(object sender, EventArgs e)
+        {
+            int errorNumber = 0;
+            if (numErrorCorrectible.Validate())
+            {
+                for (int i = (int)numErrorCorrectible.Value; i > 0; --i)
+                {
+                    cable.InsertRandomErrors(1, errorNumber * 13, (errorNumber + 1) * 13);
+                    ++errorNumber;
+                }
+            }
+            if (numErrorDetectable.Validate())
+            {
+                for (int i = (int)numErrorDetectable.Value; i > 0; --i)
+                {
+                    cable.InsertRandomErrors(2, errorNumber * 13, (errorNumber + 1) * 13);
+                    ++errorNumber;
+                }
+            }
+            if (numIrrecoverable.Validate())
+            {
+                for (int i = (int)numIrrecoverable.Value; i > 0; --i)
+                {
+                    cable.InsertRandomErrors(3, errorNumber * 13, (errorNumber + 1) * 13);
+                    ++errorNumber;
                 }
             }
         }
