@@ -20,6 +20,7 @@ namespace TransmissionSimulation
     {
         private bool envoie;
         private bool envoie2;
+        private object lockText;
         private StationParameters station1Parameters;
         private StationParameters station2Parameters;
         private Station station1;
@@ -181,7 +182,7 @@ namespace TransmissionSimulation
         void OnAppend(string text, RichTextBox textBox, Color textColor)
         {
 
-            lock (textBox)
+            lock (lockText)
             {
                 textBox.SelectionColor = textColor;
                 textBox.AppendText(text);
