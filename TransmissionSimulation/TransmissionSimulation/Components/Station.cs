@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using TransmissionSimulation.Helpers;
 using TransmissionSimulation.Models;
 using TransmissionSimulation.Ressources;
@@ -74,9 +75,9 @@ namespace TransmissionSimulation.Components
         bool StopExecution { get; set; }
 
         /// <summary>
-        /// Boolean indicating that execution of the station has been successfully stopped
+        /// ManualResetEvent waiting for the execution to completly stop.
         /// </summary>
-        bool ExecutionStopped { get; set; }
+        ManualResetEvent ExecutionStopped { get; set; }
 
         #endregion
 
@@ -205,7 +206,7 @@ namespace TransmissionSimulation.Components
             this.outputFileStream = outputFileStream;
             this.sendFrameDelegate = sendFrame;
             StopExecution = false;
-            ExecutionStopped = false;
+            ExecutionStopped = new ManualResetEvent(false);
 
             // Initialize constants
             int frameSizeBeforeHamming = HammingHelper.GetDataSize(Constants.FrameSize * 8) / 8;
@@ -466,7 +467,7 @@ namespace TransmissionSimulation.Components
             }
 
             // Indicate that execution was stopped
-            ExecutionStopped = true;
+            ExecutionStopped.Set();
         }
 
         public void Stop()
@@ -475,8 +476,7 @@ namespace TransmissionSimulation.Components
             StopExecution = true;
 
             // Waits for execution to be stopped
-            while (!ExecutionStopped)
-                ;
+            ExecutionStopped.WaitOne();
         }
 
         /// <summary>

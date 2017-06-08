@@ -20,6 +20,8 @@ namespace TransmissionSimulation
     {
         private StationParameters station1Parameters;
         private StationParameters station2Parameters;
+        private Station station1;
+        private Station station2;
         private Thread sendThread;
         private Thread receiveThread;
         private Transmitter cable;
@@ -71,8 +73,8 @@ namespace TransmissionSimulation
             //Start the threads
             cable = new Transmitter();
 
-            Station station1 = new Station(Constants.StationId.Station1, cable, station1Parameters.BufferSize, station1Parameters.Timeout, station1Parameters.DetectionOnly, sourceFile1, destinationFile1, ShowFrame);
-            Station station2 = new Station(Constants.StationId.Station2, cable, station2Parameters.BufferSize, station2Parameters.Timeout, station2Parameters.DetectionOnly, sourceFile2, destinationFile2, ShowFrame);
+            station1 = new Station(Constants.StationId.Station1, cable, station1Parameters.BufferSize, station1Parameters.Timeout, station1Parameters.DetectionOnly, sourceFile1, destinationFile1, ShowFrame);
+            station2 = new Station(Constants.StationId.Station2, cable, station2Parameters.BufferSize, station2Parameters.Timeout, station2Parameters.DetectionOnly, sourceFile2, destinationFile2, ShowFrame);
 
             sendThread = new Thread(station1.Start);
             receiveThread = new Thread(station2.Start);
@@ -131,7 +133,7 @@ namespace TransmissionSimulation
                 {
                     case Constants.FrameEvent.FrameReceivedCorrupted:
                         errorMessage += "Détecté";
-                        errorColor = Color.Yellow;
+                        errorColor = Color.DarkOrange;
                         break;
                     case Constants.FrameEvent.FrameReceivedNotAwaited:
                         break;
@@ -162,6 +164,7 @@ namespace TransmissionSimulation
                     {
                         MessageBox.Show(this, "Tranfert complété!");
                         //TODO fermer le programme correctement
+                        this.Close();
                     }
                 }
             }
@@ -241,6 +244,13 @@ namespace TransmissionSimulation
                     ++errorNumber;
                 }
             }
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            station1.Stop();
+            station2.Stop();
+
         }
     }
 }

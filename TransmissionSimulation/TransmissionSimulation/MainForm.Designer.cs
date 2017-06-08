@@ -31,6 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.transfertBar = new System.Windows.Forms.ProgressBar();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.txtReception = new System.Windows.Forms.RichTextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.btnInject = new System.Windows.Forms.Button();
@@ -52,7 +53,6 @@
             this.numIrrecoverable = new System.Windows.Forms.NumericUpDown();
             this.numErrorDetectable = new System.Windows.Forms.NumericUpDown();
             this.numErrorCorrectible = new System.Windows.Forms.NumericUpDown();
-            this.label4 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.dataSendGroup.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.posError1)).BeginInit();
@@ -83,6 +83,16 @@
             this.groupBox1.TabIndex = 3;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Données reçues";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Lucida Console", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.Location = new System.Drawing.Point(6, 52);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(378, 16);
+            this.label4.TabIndex = 2;
+            this.label4.Text = "ID  | Type |#Ack| Data Lengh | Erreur";
             // 
             // txtReception
             // 
@@ -278,16 +288,6 @@
             this.numErrorCorrectible.Size = new System.Drawing.Size(40, 20);
             this.numErrorCorrectible.TabIndex = 11;
             // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Lucida Console", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(6, 52);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(378, 16);
-            this.label4.TabIndex = 2;
-            this.label4.Text = "ID  | Type |#Ack| Data Lengh | Erreur";
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -302,6 +302,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainForm";
             this.Text = "IFT585 - Télématique - Équipe Kappa";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
