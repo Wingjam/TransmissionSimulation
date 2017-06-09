@@ -129,19 +129,19 @@ namespace TransmissionSimulationTests.Helpers
             Assert.AreEqual(HammingHelper.Status.OK, tupleEncrypt.Item2);
             Assert.AreEqual(HammingHelper.Status.DETECTED, tupleDecrypt.Item2);
 
+
+            // # Brute force cases
             for (int num = 0; num < 256; ++num)
             {
-
                 for (int i = 0; i < 13; ++i)
                 {
                     for (int j = 0; j < 13; ++j)
                     {
                         if (i == j)
-                        {
                             continue;
-                        }
+
                         byte[] bytes = BitConverter.GetBytes(num);
-                        bitArray = new BitArray(new byte[]{bytes[0]});
+                        bitArray = new BitArray(new[]{bytes[0]});
 
                         tupleEncrypt = HammingHelper.EncryptManager(bitArray, HammingHelper.Mode.CORRECT);
                         tupleEncrypt.Item1[j] = !tupleEncrypt.Item1[j]; // Inject error here
