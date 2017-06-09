@@ -211,8 +211,8 @@ namespace TransmissionSimulation
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             //Stoping the two stattion
-            station1.Stop();
-            station2.Stop();
+            sendThread.Abort();
+            receiveThread.Abort();
         }
     }
 }
