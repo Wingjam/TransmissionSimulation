@@ -1,17 +1,6 @@
+# Transimission Simulation
 
- ____   __   _  _   __   ____  ____        __ _   __   ____  ____   __  
-(  __) /  \ / )( \ (  ) (  _ \(  __)      (  / ) / _\ (  _ \(  _ \ / _\
- ) _) (  O )) \/ (  )(   ) __/ ) _)        )  ( /    \ ) __/ ) __//    \
-(____) \__\)\____/ (__) (__)  (____)      (__\_)\_/\_/(__)  (__)  \_/\_/
+A [Selective Reject Protocol](https://en.wikipedia.org/wiki/Selective_Repeat_ARQ) implementation with a [Hamming code](https://en.wikipedia.org/wiki/Hamming_code) implementation for a university project.  
+The pseudo-code of this protocol can be found in [this book](https://pearsonerpi.com/fr/collegial-universitaire/informatique/reseaux-5e-407521) p. 257-259 with explanations.
 
-> IFT585 - Télématique
-
-> Travail pratique #1 - Équipe Kappa
-
-Membres de l'équipe:
-- Raphaël Cayouette - 15 064 430
-- Jean-Philippe Croteau - 15 072 957
-- Jonathan Martineau - 15 059 124
-- Félix Vigneault - 15 079 576
-
-Travail réalisé sous Microsoft Visual Studio 2017
+See [project requirements](IFT585-2017-B_TP1_Enonce_V01.pdf) for more information.
